@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -42,25 +43,47 @@ class StripeConnectTests(unittest.TestCase):
             self.assertIn(marker, md)
 
     def test_proof_pipeline_writes_content(self):
-        summary = run_stripe_connect_proof(stamp_date="2026-08-07")
-        self.assertTrue(summary["ok"])
-        self.assertIn("connect-quickstart.md", summary["content_pages"])
-        quickstart = ROOT / "content" / "connect-quickstart.md"
-        self.assertTrue(quickstart.exists())
-        body = quickstart.read_text(encoding="utf-8")
-        self.assertIn("POST /v1/accounts", body)
-        self.assertIn("POST /v1/account_links", body)
-        self.assertTrue((ROOT / "artifacts/content_engine/stripe/source-mix-report.md").exists())
-        self.assertTrue((ROOT / "artifacts/content_engine/stripe/ingestion-report.md").exists())
+        with tempfile.TemporaryDirectory() as tmp:
+            art = Path(tmp) / "arts"
+            content = Path(tmp) / "content"
+            summary = run_stripe_connect_proof(
+                stamp_date="2026-08-07",
+                artifact_dir=art,
+                content_dir=content,
+            )
+            self.assertTrue(summary["ok"])
+            self.assertIn("connect-quickstart.md", summary["content_pages"])
+            quickstart = content / "connect-quickstart.md"
+            self.assertTrue(quickstart.exists())
+            body = quickstart.read_text(encoding="utf-8")
+            self.assertIn("POST /v1/accounts", body)
+            self.assertIn("POST /v1/account_links", body)
+            self.assertTrue((art / "source-mix-report.md").exists())
+            self.assertTrue((art / "ingestion-report.md").exists())
 
     def test_mock_eval_passes_after_proof(self):
-        run_stripe_connect_proof(stamp_date="2026-08-07")
-        result = run_mock()
-        self.assertEqual(result["gate"], "pass")
-        write_outputs(result)
-        self.assertTrue((ROOT / "evals" / "latest.md").exists())
-        latest = (ROOT / "evals" / "latest.md").read_text(encoding="utf-8")
-        self.assertIn("pass", latest)
+        with tempfile.TemporaryDirectory() as tmp:
+            art = Path(tmp) / "arts"
+            content = Path(tmp) / "content"
+            run_stripe_connect_proof(
+                stamp_date="2026-08-07",
+                artifact_dir=art,
+                content_dir=content,
+            )
+            # Point mock eval at the scratch content tree
+            import evals.run_connect_eval as ce
+
+            prev = ce.CONTENT
+            ce.CONTENT = content
+            try:
+                result = run_mock()
+            finally:
+                ce.CONTENT = prev
+            self.assertEqual(result["gate"], "pass")
+            latest = Path(tmp) / "latest.md"
+            write_outputs(result, latest_path=latest, runs_dir=Path(tmp) / "runs")
+            self.assertTrue(latest.exists())
+            self.assertIn("pass", latest.read_text(encoding="utf-8"))
 
     def test_live_refuses_non_test_key(self):
         from evals.run_connect_eval import run_live
@@ -69,18 +92,25 @@ class StripeConnectTests(unittest.TestCase):
             run_live("sk_live_fake")
 
     def test_accounts_page_teaches_controller_marks_type_deprecated(self):
-        run_stripe_connect_proof(stamp_date="2026-08-07")
-        accounts = (ROOT / "content" / "connect-postaccounts.md").read_text(encoding="utf-8")
-        self.assertIn("controller[fees][payer]", accounts)
-        self.assertIn("controller[losses][payments]", accounts)
-        self.assertIn("controller[stripe_dashboard][type]", accounts)
-        # type remains only as a deprecated alternative
-        self.assertRegex(accounts, r"(?i)deprecated")
-        self.assertIn("| type |", accounts)
-        quickstart = (ROOT / "content" / "connect-quickstart.md").read_text(encoding="utf-8")
-        self.assertIn("controller[", quickstart)
-        self.assertIn("collection_options[fields]=currently_due", quickstart)
-        self.assertIn("account.updated", quickstart)
+        with tempfile.TemporaryDirectory() as tmp:
+            art = Path(tmp) / "arts"
+            content = Path(tmp) / "content"
+            run_stripe_connect_proof(
+                stamp_date="2026-08-07",
+                artifact_dir=art,
+                content_dir=content,
+            )
+            accounts = (content / "connect-postaccounts.md").read_text(encoding="utf-8")
+            self.assertIn("controller[fees][payer]", accounts)
+            self.assertIn("controller[losses][payments]", accounts)
+            self.assertIn("controller[stripe_dashboard][type]", accounts)
+            # type remains only as a deprecated alternative
+            self.assertRegex(accounts, r"(?i)deprecated")
+            self.assertIn("| type |", accounts)
+            quickstart = (content / "connect-quickstart.md").read_text(encoding="utf-8")
+            self.assertIn("controller[", quickstart)
+            self.assertIn("collection_options[fields]=currently_due", quickstart)
+            self.assertIn("account.updated", quickstart)
 
 
 if __name__ == "__main__":

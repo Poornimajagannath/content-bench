@@ -170,10 +170,18 @@ def run_live(secret: str) -> Dict[str, Any]:
     }
 
 
-def write_outputs(result: Dict[str, Any]) -> None:
-    RUNS.mkdir(parents=True, exist_ok=True)
+def write_outputs(
+    result: Dict[str, Any],
+    *,
+    latest_path: Optional[Path] = None,
+    runs_dir: Optional[Path] = None,
+) -> Path:
+    """Write run JSON + latest markdown. Defaults are gitignored scratch outputs."""
+    out_runs = Path(runs_dir) if runs_dir is not None else RUNS
+    out_latest = Path(latest_path) if latest_path is not None else LATEST
+    out_runs.mkdir(parents=True, exist_ok=True)
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
-    run_path = RUNS / f"connect-{result['mode']}-{stamp}.json"
+    run_path = out_runs / f"connect-{result['mode']}-{stamp}.json"
     safe = json.loads(_redact(json.dumps(result)))
     run_path.write_text(json.dumps(safe, indent=2) + "\n", encoding="utf-8")
 
@@ -195,7 +203,9 @@ def write_outputs(result: Dict[str, Any]) -> None:
             f"| {step.get('step')} | {step.get('result')} | {_redact(str(step.get('detail', '')))} |"
         )
     lines.append("")
-    LATEST.write_text("\n".join(lines), encoding="utf-8")
+    out_latest.parent.mkdir(parents=True, exist_ok=True)
+    out_latest.write_text("\n".join(lines), encoding="utf-8")
+    return out_latest
 
 
 def main() -> int:

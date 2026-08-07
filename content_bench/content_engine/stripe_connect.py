@@ -267,9 +267,13 @@ def render_quickstart(steps: List[Dict[str, Any]]) -> str:
 def run_stripe_connect_proof(
     *,
     stamp_date: Optional[str] = None,
+    artifact_dir: Optional[Path] = None,
+    content_dir: Optional[Path] = None,
 ) -> Dict[str, Any]:
-    ARTIFACT_DIR.mkdir(parents=True, exist_ok=True)
-    CONTENT_DIR.mkdir(parents=True, exist_ok=True)
+    art = Path(artifact_dir) if artifact_dir is not None else ARTIFACT_DIR
+    content = Path(content_dir) if content_dir is not None else CONTENT_DIR
+    art.mkdir(parents=True, exist_ok=True)
+    content.mkdir(parents=True, exist_ok=True)
     day = stamp_date or date.today().isoformat()
 
     openapi = _load_openapi()
@@ -281,8 +285,8 @@ def run_stripe_connect_proof(
         sample_limit=20,
     )
     mix_md = render_source_mix_markdown(mix)
-    (ARTIFACT_DIR / "source-mix-report.md").write_text(mix_md, encoding="utf-8")
-    (ARTIFACT_DIR / "source-mix-report.json").write_text(
+    (art / "source-mix-report.md").write_text(mix_md, encoding="utf-8")
+    (art / "source-mix-report.json").write_text(
         json.dumps(mix, indent=2) + "\n", encoding="utf-8"
     )
 
@@ -295,10 +299,10 @@ def run_stripe_connect_proof(
         sample_limit=20,
         sources=guide_paths,
     )
-    (ARTIFACT_DIR / "ingestion-report.md").write_text(
+    (art / "ingestion-report.md").write_text(
         render_ingestion_report(ingest_report), encoding="utf-8"
     )
-    (ARTIFACT_DIR / "ingestion-report.json").write_text(
+    (art / "ingestion-report.json").write_text(
         json.dumps(ingest_report, indent=2) + "\n", encoding="utf-8"
     )
 
@@ -314,15 +318,19 @@ def run_stripe_connect_proof(
     for claim in claims:
         op_id = (claim.get("extras") or {}).get("operation_id") or "op"
         slug = re.sub(r"[^a-z0-9]+", "-", op_id.lower()).strip("-")
-        path = CONTENT_DIR / f"connect-{slug}.md"
+        path = content / f"connect-{slug}.md"
         path.write_text(render_endpoint_page(claim), encoding="utf-8")
         written_pages.append(path.name)
 
     steps = build_quickstart_steps(openapi)
-    quickstart_path = CONTENT_DIR / "connect-quickstart.md"
+    quickstart_path = content / "connect-quickstart.md"
     quickstart_path.write_text(render_quickstart(steps), encoding="utf-8")
     written_pages.append(quickstart_path.name)
 
+    try:
+        art_rel = str(art.relative_to(ROOT))
+    except ValueError:
+        art_rel = str(art)
     summary = {
         "ok": True,
         "source_mix_spec_share": mix["overall_spec_backed_share"],
@@ -332,9 +340,9 @@ def run_stripe_connect_proof(
         },
         "content_pages": written_pages,
         "quickstart_steps": len(steps),
-        "artifact_dir": str(ARTIFACT_DIR.relative_to(ROOT)),
+        "artifact_dir": art_rel,
     }
-    (ARTIFACT_DIR / "proof-summary.json").write_text(
+    (art / "proof-summary.json").write_text(
         json.dumps(summary, indent=2) + "\n", encoding="utf-8"
     )
     return summary

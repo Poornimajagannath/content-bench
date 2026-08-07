@@ -366,7 +366,7 @@
         "microform-payer-auth-state-machine"
       ],
       "sequence_number": 7,
-      "body_markdown": "- Add support-safe evidence collection for failed enrollments\n- Wire a Relay CLI workflow verifier for this contract",
+      "body_markdown": "- Add support-safe evidence collection for failed enrollments\n- Wire a Content CLI workflow verifier for this contract",
       "commands": [],
       "api_entities": [
         "enrollment"
@@ -376,7 +376,7 @@
       "failure_modes": [],
       "confidence": 0.85,
       "evidence_quotes": [
-        "- Add support-safe evidence collection for failed enrollments - Wire a Relay CLI workflow verifier for this contract"
+        "- Add support-safe evidence collection for failed enrollments - Wire a Content CLI workflow verifier for this contract"
       ]
     }
   ]

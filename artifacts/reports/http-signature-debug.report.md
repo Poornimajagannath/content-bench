@@ -1,4 +1,4 @@
-# Relay Bench V0 Report — `http-signature-debug`
+# Content Bench V0 Report — `http-signature-debug`
 
 Local proof only. No network. No live credentials.
 
@@ -24,7 +24,7 @@ Local proof only. No network. No live credentials.
 - Does logging the shared secret in debug headers cause Authentication Failed, or is the issue only field names like keyId vs merchantKeyId on HTTP Signature
 - alt_goal:Resolve developer confusion involving HTTP Signature, Authentication Failed, keyId, merchantKeyId
 
-## 2. What Relay discovered
+## 2. What Content Bench discovered
 
 - Am I using the wrong SDK field names for key id and secret?
 - stages:load_sandbox_env_vars,build_digest,build_signature_base,attach_vc_headers,interpret_auth_failure
@@ -49,7 +49,7 @@ Local proof only. No network. No live credentials.
 
 - Clarify HTTP Signature Debug stage ordering in public docs
 - Align SDK credential field names with docs (or docs with SDK)
-- Ship a Relay CLI workflow verifier for this contract
+- Ship a Content CLI workflow verifier for this contract
 
 ## Classification
 
@@ -61,10 +61,10 @@ Local proof only. No network. No live credentials.
 - task pack: `artifacts/task_packs/http-signature-debug.agent_task.json`
 - verifier results: `artifacts/verifier_results/http-signature-debug.result.json`
 
-## Relay CLI workflow verifier (recommended)
+## Content CLI workflow verifier (recommended)
 
 - goal: Am I using the wrong SDK field names for key id and secret?
-- command: `relay workflow verify --id http-signature-debug --fixture local`
+- command: `content workflow verify --id http-signature-debug --fixture local`
 - readiness checks:
   - Frozen seeds present under data/seeds/
   - No live credentials exported

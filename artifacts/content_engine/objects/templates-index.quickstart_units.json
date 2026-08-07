@@ -9,7 +9,7 @@
       "source_page_id": "doc-templates-index",
       "unit_type": "overview",
       "title": "Purpose",
-      "goal": "Relay \u2014 Payment Templates",
+      "goal": "Content Bench \u2014 Payment Templates",
       "product": [
         "payment-gateway",
         "acceptance-platform"
@@ -38,7 +38,7 @@
       "source_page_id": "doc-templates-index",
       "unit_type": "overview",
       "title": "Files",
-      "goal": "Relay \u2014 Payment Templates",
+      "goal": "Content Bench \u2014 Payment Templates",
       "product": [
         "payment-gateway",
         "acceptance-platform"
@@ -67,7 +67,7 @@
       "source_page_id": "doc-templates-index",
       "unit_type": "warning",
       "title": "Common Gotchas",
-      "goal": "Relay \u2014 Payment Templates",
+      "goal": "Content Bench \u2014 Payment Templates",
       "product": [
         "payment-gateway",
         "acceptance-platform"

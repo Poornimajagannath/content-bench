@@ -32,9 +32,9 @@ For now, proceed with **docs-only benchmark evaluation** (scenarios scaffolded i
 
 ## Files
 
-- `relay-bench/run-sdk-auth.py` — MCP-first SDK auth script (generates correct signatures but always 401)
-- `relay-bench/capture-send.py` — traces exactly what SDK sends over HTTP
-- `relay-bench/verify-manual.py` — replays SDK headers via raw HTTP
+- `content-bench/run-sdk-auth.py` — MCP-first SDK auth script (generates correct signatures but always 401)
+- `content-bench/capture-send.py` — traces exactly what SDK sends over HTTP
+- `content-bench/verify-manual.py` — replays SDK headers via raw HTTP
 - `skills/payment-gateway-sdk/SKILL.md` — MCP-first workflow (still valid for payload construction)
 
 ---

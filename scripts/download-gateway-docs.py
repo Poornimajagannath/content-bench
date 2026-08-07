@@ -30,7 +30,7 @@ def url_to_path(url):
     return path + '.md'
 
 print("Fetching llms.txt...")
-req = urllib.request.Request(LLMS_URL, headers={'User-Agent': 'Payment Gateway-Relay/1.0'})
+req = urllib.request.Request(LLMS_URL, headers={'User-Agent': 'Payment Gateway-Content Bench/1.0'})
 with urllib.request.urlopen(req, timeout=30) as resp:
     llms_content = resp.read().decode('utf-8')
 
@@ -62,7 +62,7 @@ for i in range(start, total):
         continue
     
     try:
-        req2 = urllib.request.Request(url, headers={'User-Agent': 'Payment Gateway-Relay/1.0'})
+        req2 = urllib.request.Request(url, headers={'User-Agent': 'Payment Gateway-Content Bench/1.0'})
         with urllib.request.urlopen(req2, timeout=15) as resp:
             content = resp.read().decode('utf-8')
             with open(filepath, 'w') as f:

@@ -42,7 +42,7 @@
   "next_product_improvements": [
     "Clarify HTTP Signature Debug stage ordering in public docs",
     "Align SDK credential field names with docs (or docs with SDK)",
-    "Ship a Relay CLI workflow verifier for this contract"
+    "Ship a Content CLI workflow verifier for this contract"
   ],
   "classification": {
     "workflow_id": "http-signature-debug",
@@ -65,7 +65,7 @@
         "severity": "high",
         "summary": "Clarify HTTP Signature Debug stage ordering in public docs",
         "rationale": "Developers confused adjacent APIs and skipped required stages.",
-        "relay_cli": null
+        "content_cli": null
       },
       {
         "action_id": "http-signature-debug-sdk",
@@ -73,17 +73,17 @@
         "severity": "high",
         "summary": "Align SDK credential field names with docs (or docs with SDK)",
         "rationale": "keyId/secretKey vs merchantKeyId/merchantsecretKey drift causes auth failures.",
-        "relay_cli": null
+        "content_cli": null
       },
       {
-        "action_id": "http-signature-debug-relay-cli",
-        "product_surface": "relay_cli",
+        "action_id": "http-signature-debug-content-cli",
+        "product_surface": "content_cli",
         "severity": "high",
-        "summary": "Ship a Relay CLI workflow verifier for this contract",
+        "summary": "Ship a Content CLI workflow verifier for this contract",
         "rationale": "CLI should verify readiness, recovery, and support-safe evidence \u2014 not only wrap an API call.",
-        "relay_cli": {
+        "content_cli": {
           "goal": "Am I using the wrong SDK field names for key id and secret?",
-          "command": "relay workflow verify --id http-signature-debug --fixture local",
+          "command": "content workflow verify --id http-signature-debug --fixture local",
           "api_sdk_facts": [
             "Sandbox host is apitest.example.com",
             "SDK expects merchantKeyId and merchantsecretKey (not keyId/secretKey)",
@@ -118,7 +118,7 @@
             "eval:verifier_catch_rate_on_bad_answer"
           ],
           "future_mcp_metadata": {
-            "mcp_tool": "relay.verify_workflow",
+            "mcp_tool": "content.verify_workflow",
             "inputs": [
               "workflow_id",
               "candidate_answer_ref"

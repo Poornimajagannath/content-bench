@@ -1,5 +1,5 @@
 {
-  "schema_version": "relay.integration_success_pack.v0",
+  "schema_version": "content.integration_success_pack.v0",
   "product": "Integration Success OS",
   "audience": [
     "backend_developer"

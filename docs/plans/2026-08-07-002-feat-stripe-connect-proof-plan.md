@@ -110,7 +110,7 @@ Files: `data/stripe/openapi-connect.fixture.json`, `data/stripe/guides/*.md`, `d
 
 ### U2. Proof pipeline: mix, ingest, render content
 
-Files: `relay_bench/content_engine/stripe_connect.py`, `pipelines/run_stripe_connect_proof.py`, `artifacts/content_engine/stripe/*`, `content/*.md`
+Files: `content_bench/content_engine/stripe_connect.py`, `pipelines/run_stripe_connect_proof.py`, `artifacts/content_engine/stripe/*`, `content/*.md`
 
 - Reuse source_mix + ingest modules against Stripe paths.
 - Render endpoint fact pages and `connect-quickstart.md`.

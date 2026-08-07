@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from relay_bench.content_engine.ingest import (
+from content_bench.content_engine.ingest import (
     render_ingestion_report,
     run_ingestion_snapshot,
     stamp_copy_to_raw,

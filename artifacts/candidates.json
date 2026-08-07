@@ -1,7 +1,7 @@
 {
   "stage": "docetl_inspired_extract_suggest_pm",
   "inspired_by": {
-    "discovery": "ucbepic/docetl (heuristic default; optional import via relay_bench.docetl_discovery / --discovery docetl)",
+    "discovery": "ucbepic/docetl (heuristic default; optional import via content_bench.docetl_discovery / --discovery docetl)",
     "verifier": "tempoxyz/tempo-evals Stable Bench (not imported in V0)"
   },
   "pipeline": [
@@ -9,7 +9,7 @@
     "docetl_inspired_extract_goal_symptoms_entities",
     "suggest_workflow_id_and_stages",
     "pm_approve_or_edit",
-    "relay_bench_task_pack_and_stable_bench_inspired_verifier"
+    "content_bench_task_pack_and_stable_bench_inspired_verifier"
   ],
   "suggestion_count": 20,
   "suggestions": [
@@ -936,7 +936,7 @@
       "surface_hints": [
         "docs",
         "sdk",
-        "relay_cli"
+        "content_cli"
       ],
       "pm_decision": "approve",
       "extraction": {
@@ -1051,7 +1051,7 @@
       "surface_hints": [
         "docs",
         "sdk",
-        "relay_cli"
+        "content_cli"
       ],
       "pm_decision": "approve",
       "extraction": {
@@ -1173,7 +1173,7 @@
       ],
       "surface_hints": [
         "docs",
-        "relay_cli",
+        "content_cli",
         "mcp"
       ],
       "pm_decision": "edit",

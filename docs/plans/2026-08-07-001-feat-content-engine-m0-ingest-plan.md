@@ -5,7 +5,7 @@ artifact_contract: ce-unified-plan/v1
 artifact_readiness: implementation-ready
 product_contract_source: legacy-requirements
 execution: code
-origin: build-spec-v2 (uploaded) + products/relay/integration-success-os-spec.md
+origin: build-spec-v2 (uploaded) + products/content/integration-success-os-spec.md
 ---
 
 # Content Engine M0/M0.5/A1 — source mix, ingestion snapshot, portal from content/
@@ -72,7 +72,7 @@ Out of scope: A2 fact renderer PR loop, A3 humanizer, A4 nightly, B1–B3 tempo 
 
 - KTD3. Reuse content-engine schema types and extract heuristics; write normalized claims as JSON under `normalized/` with `source_pointer` back to `raw/<date>/...`.
   Rejected: New parallel schema language.
-  Reason: Existing `relay_bench/content_engine/schemas.py` already models quickstart units and snapshots.
+  Reason: Existing `content_bench/content_engine/schemas.py` already models quickstart units and snapshots.
 
 - KTD4. Cap M0 sampling to OpenAPI fixture ops + a stratified sample of gateway-docs (auth/quickstart/payments/index-like) so the report finishes offline and stays reviewable.
   Rejected: Score all 360 docs line-by-line by hand.
@@ -108,7 +108,7 @@ U1 (source mix) can run before or after U2; U3 portal depends on `content/` dire
 
 ### U1. Source-mix inventory and report
 
-Files: `pipelines/run_source_mix.py`, `relay_bench/content_engine/source_mix.py`, `tests/test_source_mix.py`, `artifacts/content_engine/source-mix-report.md`
+Files: `pipelines/run_source_mix.py`, `content_bench/content_engine/source_mix.py`, `tests/test_source_mix.py`, `artifacts/content_engine/source-mix-report.md`
 
 - Score each sampled page: share of endpoint/auth/field/error facts that appear in OpenAPI vs prose-only (business rules, sequencing, gotchas).
 - Emit markdown table per guide + overall split + top 10 prose-only sections for first integration.
@@ -116,7 +116,7 @@ Files: `pipelines/run_source_mix.py`, `relay_bench/content_engine/source_mix.py`
 
 ### U2. Ingestion snapshot (raw + normalized)
 
-Files: `pipelines/run_ingestion_snapshot.py`, `relay_bench/content_engine/ingest.py`, `tests/test_ingest.py`, `artifacts/content_engine/ingestion-report.md`, `raw/` (generated), `normalized/` (generated)
+Files: `pipelines/run_ingestion_snapshot.py`, `content_bench/content_engine/ingest.py`, `tests/test_ingest.py`, `artifacts/content_engine/ingestion-report.md`, `raw/` (generated), `normalized/` (generated)
 
 - Offline default: stamp-copy from `gateway-docs/` into `raw/<date>/` with `source_url` + `fetched_at`.
 - Extract schema-matching claims only; log drops (index pages, revision histories, unmatched blobs).
@@ -157,6 +157,6 @@ Settled decisions carried from the invoking LFG conversation:
 | Decision | Class | Rejected | Reason |
 |---|---|---|---|
 | Execute build-spec v2 (not solo) | user-directed | Continue solo docs-autopilot as primary | Uploaded v2 says it replaces solo |
-| Work on Integration Success OS / Relay bench | user-directed | Greenfield unrelated repo | Spec keeps that branch |
+| Work on Integration Success OS / Content Bench bench | user-directed | Greenfield unrelated repo | Spec keeps that branch |
 | Ship M0 + M0.5 + A1 first | user-directed | Jump to nightly/evals | Spec order of work |
 | Adapt A1 when portal files missing | pipeline default | Block waiting for missing branch | Files not found after search |

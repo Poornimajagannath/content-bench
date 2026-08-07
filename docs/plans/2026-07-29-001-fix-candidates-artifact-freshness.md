@@ -15,7 +15,7 @@ Keep `artifacts/candidates.json` in sync with the output from
 
 ## Problem
 
-`relay_bench/pm_gate.py` now writes richer candidate suggestion metadata:
+`content_bench/pm_gate.py` now writes richer candidate suggestion metadata:
 
 - `approved_workflow_id`
 - `original_suggested_workflow_ids`

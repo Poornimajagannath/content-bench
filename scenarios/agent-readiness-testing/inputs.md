@@ -76,7 +76,7 @@
 - Test auth field name resolution
 
 ### Scenario 2: Card Payment
-- Use Relay test card
+- Use Content Bench test card
 - Test card model structure
 - Test currency handling
 

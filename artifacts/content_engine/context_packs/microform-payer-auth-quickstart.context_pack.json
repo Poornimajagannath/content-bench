@@ -165,13 +165,13 @@
   ],
   "provenance": {
     "source_id": "microform-payer-auth-quickstart",
-    "snapshot_id": "microform-payer-auth-quickstart-36fa792e7ebb",
-    "content_hash": "36fa792e7ebb5051f65e7a304d5109a3d9cd5d64ea415f186d611327ad5d4324",
+    "snapshot_id": "microform-payer-auth-quickstart-d8027da288e0",
+    "content_hash": "d8027da288e07d1916e0127c0efdf71e41414612b88c20ace0c051d5ba1fc0e5",
     "canonical_url": "local://fixtures/microform-payer-auth-quickstart.md",
     "doc_id": "doc-microform-payer-auth-quickstart"
   },
   "constraints": [
-    "Derived Relay context pack \u2014 does not rewrite source docs",
+    "Derived Content Bench context pack \u2014 does not rewrite source docs",
     "No live credentials, PAN, or secrets",
     "Extraction backend recorded in provenance / honest_label (heuristic default; optional real DocETL via --discovery)"
   ],

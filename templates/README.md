@@ -1,4 +1,4 @@
-# Relay — Payment Templates
+# Content Bench — Payment Templates
 
 ## Purpose
 

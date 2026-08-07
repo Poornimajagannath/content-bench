@@ -1,4 +1,4 @@
-# PM workbook — Why Relay Bench exists
+# PM workbook — Why Content Bench exists
 
 ## The pain
 
@@ -14,7 +14,7 @@ That is not a measurable developer-experience loop.
 
 ## The bet
 
-Relay Bench converts confusion into a **workflow contract**:
+Content Bench converts confusion into a **workflow contract**:
 
 ```text
 developer confusion
@@ -30,14 +30,14 @@ For Microform + Payer Authentication, the system can say:
 - Developers skip enrollment / challenge / validation
 - Correct stages are the state machine below
 - The bad answer fails these checks
-- Next surface: docs + Relay CLI workflow verifier
+- Next surface: docs + Content CLI workflow verifier
 
 ## What “good” looks like for PM
 
 | Surface | Improvement |
 |---------|-------------|
 | Docs | Rewrite around the misunderstood workflow order |
-| Relay CLI | `relay workflow verify --id microform-payer-auth-state-machine --fixture local` |
+| Content CLI | `content workflow verify --id microform-payer-auth-state-machine --fixture local` |
 | MCP / assistant | Answer from the contract, not generic retrieval |
 | Quality | Measure whether bad answers are still caught after doc/CLI changes |
 

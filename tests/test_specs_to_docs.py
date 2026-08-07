@@ -6,17 +6,17 @@ import json
 import unittest
 from pathlib import Path
 
-from relay_bench.content_engine.registry import require_source
-from relay_bench.content_engine.snapshot import materialize_snapshot
-from relay_bench.content_engine.specs_compose import compose_reference_units
-from relay_bench.content_engine.specs_parser import parse_openapi_entities
-from relay_bench.content_engine.specs_pipeline import run_specs_to_docs
-from relay_bench.content_engine.specs_validate import (
+from content_bench.content_engine.registry import require_source
+from content_bench.content_engine.snapshot import materialize_snapshot
+from content_bench.content_engine.specs_compose import compose_reference_units
+from content_bench.content_engine.specs_parser import parse_openapi_entities
+from content_bench.content_engine.specs_pipeline import run_specs_to_docs
+from content_bench.content_engine.specs_validate import (
     validate_contract_alignment,
     validate_units_content,
     validate_units_schema,
 )
-from relay_bench.content_engine.schemas import ApiReferenceUnit
+from content_bench.content_engine.schemas import ApiReferenceUnit
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_ID = "payments-core-openapi"

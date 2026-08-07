@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.3",
   "info": {
-    "title": "Payment Gateway Payments Core (local Relay fixture)",
+    "title": "Payment Gateway Payments Core (local Content Bench fixture)",
     "version": "0.1.0-local",
     "description": "Frozen local OpenAPI fixture for Specs-to-Docs V0. Not a live Payment Gateway download. No secrets or PAN."
   },

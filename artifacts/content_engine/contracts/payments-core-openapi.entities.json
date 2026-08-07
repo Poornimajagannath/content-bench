@@ -1,8 +1,8 @@
 {
   "stage": "specs_to_docs_parse",
   "source_id": "payments-core-openapi",
-  "snapshot_id": "payments-core-openapi-3c0a54262889",
-  "content_hash": "3c0a54262889baf799d1a8c7c8d79cbc9bbe16713e34d8c299207627aa04ce98",
+  "snapshot_id": "payments-core-openapi-ae875f65766e",
+  "content_hash": "ae875f65766e81b88dc6e00cafc0c0517adf3c82aa8c64bbce50ab157f711fdb",
   "entity_count": 8,
   "entities": [
     {
@@ -11,7 +11,7 @@
         "payment-gateway",
         "acceptance-platform"
       ],
-      "service_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "service_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/pts/v2/credits",
       "http_method": "POST",
       "operation_id": "createCredit",
@@ -40,7 +40,7 @@
         "payment-gateway",
         "acceptance-platform"
       ],
-      "service_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "service_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/pts/v2/payments",
       "http_method": "POST",
       "operation_id": "createPayment",
@@ -69,7 +69,7 @@
         "payment-gateway",
         "acceptance-platform"
       ],
-      "service_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "service_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/pts/v2/payments/{id}",
       "http_method": "GET",
       "operation_id": "getPayment",
@@ -96,7 +96,7 @@
         "payment-gateway",
         "acceptance-platform"
       ],
-      "service_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "service_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/pts/v2/payments/{id}/captures",
       "http_method": "POST",
       "operation_id": "capturePayment",
@@ -125,7 +125,7 @@
         "payment-gateway",
         "acceptance-platform"
       ],
-      "service_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "service_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/risk/v1/authentication-setups",
       "http_method": "POST",
       "operation_id": "createMppCredentialSetup",
@@ -154,7 +154,7 @@
         "payment-gateway",
         "acceptance-platform"
       ],
-      "service_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "service_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/risk/v1/authentications",
       "http_method": "POST",
       "operation_id": "checkMppEnrollment",
@@ -183,7 +183,7 @@
         "payment-gateway",
         "acceptance-platform"
       ],
-      "service_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "service_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/tms/v2/customers",
       "http_method": "POST",
       "operation_id": "createCustomer",
@@ -212,7 +212,7 @@
         "payment-gateway",
         "acceptance-platform"
       ],
-      "service_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "service_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/tms/v2/customers/{customerId}",
       "http_method": "GET",
       "operation_id": "getCustomer",

@@ -1,13 +1,13 @@
-# Relay Bench V0 (local prototype)
+# Content Bench V0 (local prototype)
 
 **Status:** Credential-free local proof
-**Not:** production Relay, live Payment Gateway sandbox, real DocETL, or real Tempo/Harbor
+**Not:** production Content Bench, live Payment Gateway sandbox, real DocETL, or real Tempo/Harbor
 
 ## Product thesis
 
 Developers stuck on Flex, Microform + Payer Auth, or HTTP Signature should not have to stitch together forum threads, docs pages, SDK quirks, and AI guesses.
 
-Relay Bench turns that confusion into a **workflow contract**:
+Content Bench turns that confusion into a **workflow contract**:
 
 ```text
 public developer confusion
@@ -22,7 +22,7 @@ public developer confusion
 That improves:
 
 1. **Docs** — rewrite around misunderstood workflows, not isolated APIs
-2. **Relay CLI** — eventually `relay workflow verify --id <workflow> --fixture local`
+2. **Content CLI** — eventually `content workflow verify --id <workflow> --fixture local`
 3. **Assistant / MCP answers** — ground replies in the contract
 4. **Quality gate** — prove bad answers are caught so docs/CLI/assistant can be measured
 
@@ -42,7 +42,7 @@ hard question seeds (20 frozen JSONL)
 → DocETL-inspired extract goal/symptoms/entities
 → suggest workflow_id + stages
 → PM approve/edit (reduce many seeds → one contract)
-→ Relay Bench creates agent_task + verifier_private
+→ Content Bench creates agent_task + verifier_private
 → failure classifier
 → product-surface improvement action
 → PM-readable report
@@ -90,11 +90,11 @@ Artifacts: `artifacts/content_engine/stripe/`, `content/connect-*.md`, `evals/la
 ## PM entrypoints
 
 - `HANDOFF.md` — intent and acceptance criteria
-- `reports/pm_workbook.md` — why Relay Bench exists
+- `reports/pm_workbook.md` — why Content Bench exists
 - `reports/demo_microform_payer_auth_state_machine.md` — advanced workflow proof
 - `reports/generated_failure_taxonomy.md` — failure-class routing
 - `artifacts/reports/microform-payer-auth-state-machine.report.md` — latest generated proof
 
 ## Plan
 
-`docs/plans/2026-07-25-001-feat-relay-bench-v0-pipeline-plan.md` is authoritative for CE/DoD.
+`docs/plans/2026-07-25-001-feat-content-bench-v0-pipeline-plan.md` is authoritative for CE/DoD.

@@ -250,7 +250,7 @@ Processing extract_quickstart_fields (code_map): 100%|████████�
            │ Output:                                                           │
            ╰───────────────────────────────────────────────────────────────────╯
 [full_docetl]   status=promoted units=10 docetl=imported-code_map ok=True
-[full_docetl] content_engine source=scenario-relay-context-swapping type=scenario
+[full_docetl] content_engine source=scenario-context-swapping type=scenario
 [04:04:48] Checking operations...                                               
                                                                                 
            ✓ Operation 'extract_quickstart_fields' (code_map)                   

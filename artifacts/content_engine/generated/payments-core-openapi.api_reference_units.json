@@ -6,7 +6,7 @@
     {
       "unit_id": "payments-core-openapi:ref:createCredit",
       "doc_id": "doc-payments-core-openapi",
-      "api_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "api_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/pts/v2/credits",
       "http_method": "POST",
       "summary": "Create a credit",
@@ -50,7 +50,7 @@
     {
       "unit_id": "payments-core-openapi:ref:createPayment",
       "doc_id": "doc-payments-core-openapi",
-      "api_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "api_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/pts/v2/payments",
       "http_method": "POST",
       "summary": "Create a payment authorization",
@@ -95,7 +95,7 @@
     {
       "unit_id": "payments-core-openapi:ref:getPayment",
       "doc_id": "doc-payments-core-openapi",
-      "api_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "api_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/pts/v2/payments/{id}",
       "http_method": "GET",
       "summary": "Retrieve a payment",
@@ -139,7 +139,7 @@
     {
       "unit_id": "payments-core-openapi:ref:capturePayment",
       "doc_id": "doc-payments-core-openapi",
-      "api_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "api_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/pts/v2/payments/{id}/captures",
       "http_method": "POST",
       "summary": "Capture an authorized payment",
@@ -190,7 +190,7 @@
     {
       "unit_id": "payments-core-openapi:ref:createMppCredentialSetup",
       "doc_id": "doc-payments-core-openapi",
-      "api_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "api_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/risk/v1/authentication-setups",
       "http_method": "POST",
       "summary": "Create payer authentication / MPP credential setup",
@@ -235,7 +235,7 @@
     {
       "unit_id": "payments-core-openapi:ref:checkMppEnrollment",
       "doc_id": "doc-payments-core-openapi",
-      "api_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "api_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/risk/v1/authentications",
       "http_method": "POST",
       "summary": "Check payer authentication enrollment",
@@ -280,7 +280,7 @@
     {
       "unit_id": "payments-core-openapi:ref:createCustomer",
       "doc_id": "doc-payments-core-openapi",
-      "api_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "api_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/tms/v2/customers",
       "http_method": "POST",
       "summary": "Create a TMS customer",
@@ -324,7 +324,7 @@
     {
       "unit_id": "payments-core-openapi:ref:getCustomer",
       "doc_id": "doc-payments-core-openapi",
-      "api_name": "Payment Gateway Payments Core (local Relay fixture)",
+      "api_name": "Payment Gateway Payments Core (local Content Bench fixture)",
       "endpoint": "/tms/v2/customers/{customerId}",
       "http_method": "GET",
       "summary": "Retrieve a TMS customer",

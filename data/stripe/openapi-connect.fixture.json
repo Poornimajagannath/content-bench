@@ -3,7 +3,7 @@
   "info": {
     "title": "Stripe Connect (proof fixture)",
     "version": "2024-06-20",
-    "description": "Trimmed local fixture for Relay content-engine proof. Not the full Stripe OpenAPI. Derived from public Stripe API shapes for Accounts and Account Links."
+    "description": "Trimmed local fixture for Content Bench content-engine proof. Not the full Stripe OpenAPI. Derived from public Stripe API shapes for Accounts and Account Links."
   },
   "servers": [
     {"url": "https://api.stripe.com"}

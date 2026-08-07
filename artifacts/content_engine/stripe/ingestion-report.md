@@ -24,3 +24,4 @@ Milestone 0.5: corpus cleaned at the door. `raw/` is immutable evidence; serve l
 | Path | Reason | Detail |
 | --- | --- | --- |
 | 2026-08-06/account-links.md | no_schema_match | no quickstart/endpoint/error/prose claim extracted |
+| 2026-08-06/openapi-connect.fixture.json | no_schema_match | no quickstart/endpoint/error/prose claim extracted |

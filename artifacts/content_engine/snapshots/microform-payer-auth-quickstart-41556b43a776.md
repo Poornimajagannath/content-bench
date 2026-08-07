@@ -82,4 +82,4 @@ Evidence: "including authentication transaction references when 3DS was performe
 ## Next steps
 
 - Add support-safe evidence collection for failed enrollments
-- Wire a Relay CLI workflow verifier for this contract
+- Wire a Content CLI workflow verifier for this contract

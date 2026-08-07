@@ -12,7 +12,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from evals.run_connect_eval import REQUIRED_QUICKSTART_MARKERS, run_mock, write_outputs  # noqa: E402
-from relay_bench.content_engine.stripe_connect import (  # noqa: E402
+from content_bench.content_engine.stripe_connect import (  # noqa: E402
     OPENAPI_PATH,
     build_quickstart_steps,
     render_quickstart,

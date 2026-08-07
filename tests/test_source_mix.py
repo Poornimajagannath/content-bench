@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from relay_bench.content_engine.source_mix import (
+from content_bench.content_engine.source_mix import (
     analyze_source_mix,
     render_source_mix_markdown,
 )

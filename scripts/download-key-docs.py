@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fetch key Payment Gateway integration docs for the Relay pipeline"""
+"""Fetch key Payment Gateway integration docs for the Content Bench pipeline"""
 import re
 import os
 import json
@@ -24,7 +24,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 results = []
 for url in DOCS_URLS:
     try:
-        req = urllib.request.Request(url, headers={'User-Agent': 'Payment Gateway-Relay/1.0'})
+        req = urllib.request.Request(url, headers={'User-Agent': 'Payment Gateway-Content Bench/1.0'})
         with urllib.request.urlopen(req, timeout=15) as resp:
             content = resp.read().decode('utf-8')
             filename = url.split('/')[-1]

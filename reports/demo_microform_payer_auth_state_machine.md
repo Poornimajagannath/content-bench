@@ -9,7 +9,7 @@ Local proof only. No network. No live credentials.
 - which authentication ids must flow into payment authorization
 - Treating Microform tokenize as if 3DS were already complete
 
-## 2. What Relay discovered
+## 2. What Content Bench discovered
 
 Goal: Sequence Microform tokenization with Payer Authentication enrollment, challenge/frictionless handling, and authorization using the authentication result.
 
@@ -40,10 +40,10 @@ Failed checks (full expected set required):
 ## 5. What product surface improves next
 
 - Clarify Microform + Payer Auth stage ordering in public docs
-- Ship a Relay CLI workflow verifier for this contract:
+- Ship a Content CLI workflow verifier for this contract:
 
 ```bash
-relay workflow verify --id microform-payer-auth-state-machine --fixture local
+content workflow verify --id microform-payer-auth-state-machine --fixture local
 ```
 
 ## Artifacts

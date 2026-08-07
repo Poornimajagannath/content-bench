@@ -1,6 +1,6 @@
 # Workflow Contract Bundle — `http-signature-debug`
 
-schema_version: `relay.workflow_contract_bundle.v0`
+schema_version: `content.workflow_contract_bundle.v0`
 
 Local proof only. DocETL-style extraction and Harbor/Tempo-style eval export are inspirations — not live upstream integrations.
 
@@ -79,4 +79,4 @@ Hidden truth content is intentionally omitted from this bundle.
 - improvement_actions:
   - [docs] Clarify HTTP Signature Debug stage ordering in public docs
   - [sdk] Align SDK credential field names with docs (or docs with SDK)
-  - [relay_cli] Ship a Relay CLI workflow verifier for this contract
+  - [content_cli] Ship a Content CLI workflow verifier for this contract

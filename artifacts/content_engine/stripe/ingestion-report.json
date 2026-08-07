@@ -8,10 +8,15 @@
     "error_case": 0,
     "prose_claim": 14
   },
-  "drop_count": 1,
+  "drop_count": 2,
   "drops": [
     {
       "path": "2026-08-06/account-links.md",
+      "reason": "no_schema_match",
+      "detail": "no quickstart/endpoint/error/prose claim extracted"
+    },
+    {
+      "path": "2026-08-06/openapi-connect.fixture.json",
       "reason": "no_schema_match",
       "detail": "no quickstart/endpoint/error/prose claim extracted"
     }

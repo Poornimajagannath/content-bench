@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run-scenario.sh — run one Relay benchmark scenario.
+# run-scenario.sh — run one Content Bench benchmark scenario.
 #
 # Usage:
 #     scripts/run-scenario.sh SCENARIO [RUN_MODE]
@@ -50,7 +50,7 @@ if [ "$RUN_MODE" = "dry" ] || [ "${LAB_DRY_RUN:-0}" = "1" ]; then
 
   # Write placeholder artifacts
   cat > "${RUN_DIR}/findings.md" <<MD
-# Relay Benchmark — Findings
+# Content Benchmark — Findings
 
 ## Run metadata
 - run_id: ${PGW_RUN_ID}
@@ -176,7 +176,7 @@ else
 
   # Build the agent prompt with scenario context
   cat > "${RUN_DIR}/agent-prompt.md" <<PROMPT
-You are running inside the Relay Benchmark lab for Payment Gateway.
+You are running inside the Content Benchmark lab for Payment Gateway.
 
 ## Your Task
 Run scenario '${SCENARIO}' in runs/${PGW_RUN_ID}.

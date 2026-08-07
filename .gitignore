@@ -16,3 +16,6 @@ normalized/*.claims.json
 
 # Eval traces (regenerable)
 evals/runs/*.json
+
+mcp-server/node_modules/
+evals/manual-runs.jsonl

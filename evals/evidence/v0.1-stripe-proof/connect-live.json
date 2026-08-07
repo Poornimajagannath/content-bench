@@ -1,0 +1,27 @@
+{
+  "mode": "live",
+  "gate": "pass",
+  "reason": "created connected account (v2) + Account Link in Samaya test mode",
+  "platform": "samaya-sandbox",
+  "account_api": "v2",
+  "steps": [
+    {
+      "step": "create_account",
+      "result": "pass",
+      "api": "v2",
+      "stripe_version": "2026-07-29.dahlia",
+      "http_status": 200,
+      "account_id": "acct_1U1h3kDpnlkOf6fE",
+      "detail": "{\"fallback\": \"Accounts v1 disabled on platform; used Samaya v2 path\", \"error_or_id\": \"acct_1U1h3kDpnlkOf6fE\"}"
+    },
+    {
+      "step": "create_account_link",
+      "result": "pass",
+      "api": "v1",
+      "http_status": 200,
+      "has_url": true,
+      "detail": "{\"expires_at\": 1786083617}"
+    }
+  ],
+  "at": "2026-08-07T06:15:17+00:00"
+}

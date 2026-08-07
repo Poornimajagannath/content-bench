@@ -1,119 +1,112 @@
-# Content Bench V0 (local prototype)
+# Content Bench — Stripe Connect proof (`v0.1-stripe-proof`)
 
-**Status:** Credential-free local proof
-**Not:** production Content Bench, live Payment Gateway sandbox, real DocETL, or real Tempo/Harbor
+Public, brand-clean proof that a docs engine can **generate**, **humanize**,
+**gate**, **measure**, and **improve** integration pages — without pasting from
+raw sources and without claiming to be Stripe.
 
-## Product thesis
+Quote the parity result as **15 of 15 parity checks**, not “identical to Stripe.”
 
-Developers stuck on Flex, Microform + Payer Auth, or HTTP Signature should not have to stitch together forum threads, docs pages, SDK quirks, and AI guesses.
+## The five-part story
 
-Content Bench turns that confusion into a **workflow contract**:
+### 1. Generated from spec
 
-```text
-public developer confusion
-→ structured workflow candidate
-→ agent-visible task pack (agent_task)
-→ hidden verifier/oracle (verifier_private)
-→ structured verifier result
-→ product-surface improvement action
-→ PM-readable report
-```
-
-That improves:
-
-1. **Docs** — rewrite around misunderstood workflows, not isolated APIs
-2. **Content CLI** — eventually `content workflow verify --id <workflow> --fixture local`
-3. **Assistant / MCP answers** — ground replies in the contract
-4. **Quality gate** — prove bad answers are caught so docs/CLI/assistant can be measured
-
-## V0 boundary (honest label)
-
-| Label | Upstream | Used in V0? |
-|-------|----------|-------------|
-| DocETL-inspired discovery | [`ucbepic/docetl`](https://github.com/ucbepic/docetl) | **No import** — local heuristic extract/suggest |
-| Stable Bench-inspired verifier | [`tempoxyz/tempo-evals`](https://github.com/tempoxyz/tempo-evals) | **No Harbor/Docker** — deterministic fixture checks |
-
-V0 is dependency-light Python stdlib only. No network. No sandbox credentials. No PAN/secret logging.
-
-## Pipeline
-
-```text
-hard question seeds (20 frozen JSONL)
-→ DocETL-inspired extract goal/symptoms/entities
-→ suggest workflow_id + stages
-→ PM approve/edit (reduce many seeds → one contract)
-→ Content Bench creates agent_task + verifier_private
-→ failure classifier
-→ product-surface improvement action
-→ PM-readable report
-```
-
-## Run
-
-```bash
-python3 -m unittest discover -s tests
-python3 pipelines/synthesize_candidates.py
-python3 pipelines/run_demo.py --workflow flex-token-lifecycle
-python3 pipelines/run_demo.py --workflow http-signature-debug
-python3 pipelines/run_demo.py --workflow microform-payer-auth-state-machine
-python3 pipelines/run_bench_v0.py --workflow microform-payer-auth-state-machine
-```
-
-## Content engine (M0 / M0.5 / A1 / A2)
-
-```bash
-python3 pipelines/run_source_mix.py
-python3 pipelines/run_ingestion_snapshot.py
-python3 pipelines/run_reference_pages_a2.py   # A2: OpenAPI reference units → content/*.md
-python3 pipelines/write_prose.py              # A3: draft Overview prose (facts untouched)
-python3 pipelines/humanize.py                 # A3: customer-voice rewrite (fact_hash guarded)
-python3 scripts/check_content_render.py
-node portal/server.js   # http://127.0.0.1:8787 — serves content/*.md only
-```
-
-Reports: `artifacts/content_engine/source-mix-report.md`, `artifacts/content_engine/ingestion-report.md`.
-A2 pages carry `lineage_origin: generated_from_spec` (e.g. `content/createPayment.md`).
-A3 rewrites only `<!-- section:prose -->`; templated facts in `<!-- section:facts -->` are
-protected by `fact_hash` (`tests/test_humanizer.py::test_humanizer_cannot_change_templated_fact`).
-Serve layers read `normalized/` + `content/` only — never `raw/`.
-Style guide: `style/customer-voice.md` (ten rules; edit the file to improve voice).
-
-
-## Stripe Connect proof
-
-Public proof that the content engine works on a real API (Accounts + Account Links). Uses a trimmed local OpenAPI fixture + Connect prose guides — not a Stripe endorsement.
+Connect reference pages and the onboarding quickstart are rendered from a local
+OpenAPI fixture plus Connect prose guides. Nothing is hand-pasted into
+`content/`.
 
 ```bash
 python3 pipelines/run_stripe_connect_proof.py
-python3 evals/run_connect_eval.py --mode mock
-# optional live gate (test keys only):
-# STRIPE_TEST_SECRET_KEY=sk_test_... python3 evals/run_connect_eval.py --mode live
-python3 scripts/check_content_render.py
-node portal/server.js   # http://127.0.0.1:8787/connect-quickstart
+python3 pipelines/run_reference_pages_a2.py   # Payment Gateway fixture pages (separate lane)
 ```
 
-Artifacts: `artifacts/content_engine/stripe/`, `content/connect-*.md`, `evals/latest.md`.
+Published pages: `content/connect-*.md`.
 
-## content-docs MCP (hand testing)
+### 2. Gated by a human (A3)
 
-Docs-only agent tools for Cursor / Codex / Claude Code. Answers come from `content/` + generated reference units only; every hand test can log to `evals/manual-runs.jsonl`.
+Prose goes through `write_prose` → `humanize` against
+[`style/customer-voice.md`](style/customer-voice.md) (ten rules). Templated
+facts live in `<!-- section:facts -->` and are protected by `fact_hash`.
+
+Proof the humanizer cannot change a fact:
+
+`tests/test_humanizer.py::HumanizerTests.test_humanizer_cannot_change_templated_fact`
 
 ```bash
-cd mcp-server && npm install
-# Cursor: .cursor/mcp.json is checked in (server name: content-docs)
-# Agent contract: agents/doc-agent.md
+python3 pipelines/write_prose.py
+python3 pipelines/humanize.py
+python3 -m unittest tests.test_humanizer
 ```
 
-See `mcp-server/README.md`.
+Every page still merges only via PR.
 
-## PM entrypoints
+### 3. Proven by a task eval
 
-- `HANDOFF.md` — intent and acceptance criteria
-- `reports/pm_workbook.md` — why Content Bench exists
-- `reports/demo_microform_payer_auth_state_machine.md` — advanced workflow proof
-- `reports/generated_failure_taxonomy.md` — failure-class routing
-- `artifacts/reports/microform-payer-auth-state-machine.report.md` — latest generated proof
+An eval walks the generated Connect docs and either:
 
-## Plan
+- **mock** — asserts required onboarding facts are present (PR gate), or
+- **live** — creates a real test-mode connected account + Account Link with a
+  `sk_test_` key (demo claim).
 
-`docs/plans/2026-07-25-001-feat-content-bench-v0-pipeline-plan.md` is authoritative for CE/DoD.
+```bash
+python3 evals/run_connect_eval.py --mode mock
+STRIPE_TEST_SECRET_KEY=sk_test_... python3 evals/run_connect_eval.py --mode live
+```
+
+Frozen live trace: [`evals/evidence/v0.1-stripe-proof/connect-live.md`](evals/evidence/v0.1-stripe-proof/connect-live.md)
+([JSON](evals/evidence/v0.1-stripe-proof/connect-live.json)).
+
+> **Live gate status:** the first live attempt failed because this Stripe
+> platform account has Accounts v1 creation disabled. Enable
+> [feat_accounts_v1_support](https://dashboard.stripe.com/settings/features/feat_accounts_v1_support)
+> in test mode, re-run `--mode live`, and replace the evidence files before
+> treating the demo sentence as true. Mock gate remains **pass**.
+
+### 4. Measured against live upstream
+
+Nightly (and on demand) we fetch public Stripe docs and score our Connect pages.
+
+Frozen result: [`evals/evidence/v0.1-stripe-proof/parity-15-of-15.md`](evals/evidence/v0.1-stripe-proof/parity-15-of-15.md)
+— **15 of 15** graded checks, fidelity score 100.0% on that checklist.
+
+```bash
+python3 evals/run_stripe_docs_compare.py --evidence
+```
+
+Parity is **evidence only**, never a PR gate. Nightly reports push to
+`evidence/stripe-docs-parity` (not `main`).
+
+### 5. Improved from evidence
+
+Failed eval steps and parity gaps feed the next regen from sources — never
+hand-edits to `content/`. After `v0.1-stripe-proof`, the Stripe lane takes
+**no new features**; only the nightly parity job keeps running as a freshness
+demo. New scope goes to the CyberSource lane in the private repo.
+
+## Invariants
+
+- Serve layers (portal, MCP, humanizer, evals) read `content/` + `normalized/` only — never `raw/`.
+- Task eval may gate PRs; parity eval must not.
+- No secrets or PAN in traces (`_redact` on live runs).
+- Engine fixes made privately port back here the same day; private corpus never lands in this repo.
+
+## Quick start
+
+```bash
+python3 -m unittest discover -s tests
+python3 evals/run_connect_eval.py --mode mock
+python3 scripts/check_content_render.py
+cd mcp-server && npm install   # content-docs MCP — see mcp-server/README.md
+node portal/server.js          # http://127.0.0.1:8787/connect-quickstart
+```
+
+## Also in this repo
+
+Earlier Content Bench workflow-contract prototypes (Flex / Microform / HTTP
+Signature) remain under `pipelines/run_demo.py` and `reports/`. The Stripe
+Connect lane above is the public end-to-end proof of the content engine.
+
+## Plans
+
+- `docs/plans/2026-08-07-002-feat-stripe-connect-proof-plan.md`
+- `docs/plans/2026-08-07-003-feat-a2-reference-pages-plan.md`
+- `docs/plans/2026-08-07-004-feat-a3-humanizer-plan.md`

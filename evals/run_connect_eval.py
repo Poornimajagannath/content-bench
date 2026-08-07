@@ -76,22 +76,41 @@ def run_mock() -> Dict[str, Any]:
     }
 
 
-def _stripe_form(
-    path: str,
-    secret: str,
-    fields: Dict[str, str],
-) -> Tuple[int, Dict[str, Any], str]:
+# Samaya sandbox / stripe-quickstart use Accounts v2 (API version from stripe-node).
+STRIPE_V2_VERSION = "2026-07-29.dahlia"
+STRIPE_V2_VERSION_FALLBACK = "2025-11-17.preview"
+
+
+def _require_test_secret(secret: str) -> None:
     if not secret.startswith("sk_test_"):
         raise ValueError("Live eval requires a test-mode key (sk_test_...). Refusing other key types.")
-    data = urllib.parse.urlencode(fields).encode("utf-8")
+
+
+def _stripe_request(
+    path: str,
+    secret: str,
+    *,
+    method: str = "POST",
+    fields: Optional[Dict[str, str]] = None,
+    json_body: Optional[Dict[str, Any]] = None,
+    stripe_version: Optional[str] = None,
+) -> Tuple[int, Dict[str, Any], str]:
+    _require_test_secret(secret)
+    headers = {"Authorization": f"Bearer {secret}"}
+    data: Optional[bytes] = None
+    if json_body is not None:
+        headers["Content-Type"] = "application/json"
+        data = json.dumps(json_body).encode("utf-8")
+    elif fields is not None:
+        headers["Content-Type"] = "application/x-www-form-urlencoded"
+        data = urllib.parse.urlencode(fields).encode("utf-8")
+    if stripe_version:
+        headers["Stripe-Version"] = stripe_version
     req = urllib.request.Request(
         f"https://api.stripe.com{path}",
         data=data,
-        method="POST",
-        headers={
-            "Authorization": f"Bearer {secret}",
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
+        method=method,
+        headers=headers,
     )
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
@@ -106,10 +125,72 @@ def _stripe_form(
         return exc.code, payload, raw
 
 
+def _stripe_form(
+    path: str,
+    secret: str,
+    fields: Dict[str, str],
+) -> Tuple[int, Dict[str, Any], str]:
+    return _stripe_request(path, secret, fields=fields)
+
+
+def _v1_accounts_disabled(payload: Dict[str, Any]) -> bool:
+    msg = str((payload.get("error") or {}).get("message") or payload)
+    return "Accounts v1" in msg and "feat_accounts_v1_support" in msg
+
+
+def _create_account_v2(secret: str) -> Tuple[int, Dict[str, Any], str, str]:
+    """Create a connected account the Samaya sandbox way (Accounts v2)."""
+    body = {
+        "display_name": "content-bench live eval",
+        "contact_email": "content-bench-eval@example.com",
+        "dashboard": "express",
+        "defaults": {
+            "responsibilities": {
+                "fees_collector": "application",
+                "losses_collector": "application",
+            }
+        },
+        "identity": {"country": "US"},
+        "configuration": {
+            "recipient": {
+                "capabilities": {
+                    "stripe_balance": {"stripe_transfers": {"requested": True}}
+                }
+            },
+            "merchant": {
+                "capabilities": {"card_payments": {"requested": True}}
+            },
+        },
+        "include": [
+            "configuration.merchant",
+            "configuration.recipient",
+            "identity",
+            "defaults",
+        ],
+    }
+    for version in (STRIPE_V2_VERSION, STRIPE_V2_VERSION_FALLBACK):
+        status, account, raw = _stripe_request(
+            "/v2/core/accounts",
+            secret,
+            json_body=body,
+            stripe_version=version,
+        )
+        if status in (200, 201) and str(account.get("id", "")).startswith("acct_"):
+            return status, account, raw, version
+    return status, account, raw, version
+
+
 def run_live(secret: str) -> Dict[str, Any]:
+    """Live gate against the Samaya Stripe test platform.
+
+    Prefer Accounts v1 (matches generated Connect docs). If the platform has
+    disabled v1 creation — Samaya sandbox default — fall back to Accounts v2
+    as used by ~/workspace/stripe-quickstart, then create a v1 Account Link.
+    """
     steps: List[Dict[str, Any]] = []
-    # Create account
-    status, account, raw = _stripe_form(
+    api_used = "v1"
+
+    status, account, _raw = _stripe_form(
         "/v1/accounts",
         secret,
         {
@@ -121,16 +202,61 @@ def run_live(secret: str) -> Dict[str, Any]:
             "capabilities[transfers][requested]": "true",
         },
     )
-    steps.append(
-        {
-            "step": "create_account",
-            "result": "pass" if status == 200 and account.get("id", "").startswith("acct_") else "fail",
-            "http_status": status,
-            "account_id": account.get("id"),
-            "detail": _redact(json.dumps(account.get("error", account.get("id")))) ,
-        }
-    )
-    if steps[-1]["result"] != "pass":
+    if status == 200 and str(account.get("id", "")).startswith("acct_"):
+        steps.append(
+            {
+                "step": "create_account",
+                "result": "pass",
+                "api": "v1",
+                "http_status": status,
+                "account_id": account.get("id"),
+                "detail": account.get("id"),
+            }
+        )
+    elif _v1_accounts_disabled(account):
+        status, account, _raw, version = _create_account_v2(secret)
+        api_used = "v2"
+        ok_create = status in (200, 201) and str(account.get("id", "")).startswith(
+            "acct_"
+        )
+        steps.append(
+            {
+                "step": "create_account",
+                "result": "pass" if ok_create else "fail",
+                "api": "v2",
+                "stripe_version": version,
+                "http_status": status,
+                "account_id": account.get("id"),
+                "detail": _redact(
+                    json.dumps(
+                        {
+                            "fallback": "Accounts v1 disabled on platform; used Samaya v2 path",
+                            "error_or_id": account.get("error", account.get("id")),
+                        }
+                    )
+                ),
+            }
+        )
+        if not ok_create:
+            return {
+                "mode": "live",
+                "gate": "fail",
+                "reason": "account creation failed (v1 disabled; v2 fallback failed)",
+                "platform": "samaya-sandbox",
+                "steps": steps,
+                "at": _utc_now(),
+            }
+    else:
+        steps.append(
+            {
+                "step": "create_account",
+                "result": "fail",
+                "api": "v1",
+                "http_status": status,
+                "account_id": account.get("id"),
+                "detail": _redact(json.dumps(account.get("error", account))),
+            }
+        )
         return {
             "mode": "live",
             "gate": "fail",
@@ -139,7 +265,7 @@ def run_live(secret: str) -> Dict[str, Any]:
             "at": _utc_now(),
         }
 
-    status2, link, raw2 = _stripe_form(
+    status2, link, _raw2 = _stripe_form(
         "/v1/account_links",
         secret,
         {
@@ -154,17 +280,24 @@ def run_live(secret: str) -> Dict[str, Any]:
         {
             "step": "create_account_link",
             "result": "pass" if ok else "fail",
+            "api": "v1",
             "http_status": status2,
             "has_url": bool(link.get("url")),
-            "detail": _redact(json.dumps(link.get("error", {"expires_at": link.get("expires_at")}))),
+            "detail": _redact(
+                json.dumps(link.get("error", {"expires_at": link.get("expires_at")}))
+            ),
         }
     )
     return {
         "mode": "live",
         "gate": "pass" if ok else "fail",
-        "reason": "created connected account + Account Link in test mode"
-        if ok
-        else "Account Link creation failed",
+        "reason": (
+            f"created connected account ({api_used}) + Account Link in Samaya test mode"
+            if ok
+            else "Account Link creation failed"
+        ),
+        "platform": "samaya-sandbox",
+        "account_api": api_used,
         "steps": steps,
         "at": _utc_now(),
     }
@@ -218,7 +351,16 @@ def main() -> int:
     else:
         secret = os.environ.get("STRIPE_TEST_SECRET_KEY", "").strip()
         if not secret:
-            print("STRIPE_TEST_SECRET_KEY not set", file=sys.stderr)
+            # Allow STRIPE_SECRET_KEY when it is already a test-mode key.
+            fallback = os.environ.get("STRIPE_SECRET_KEY", "").strip()
+            if fallback.startswith("sk_test_"):
+                secret = fallback
+        if not secret:
+            print(
+                "STRIPE_TEST_SECRET_KEY not set "
+                "(or STRIPE_SECRET_KEY sk_test_ fallback)",
+                file=sys.stderr,
+            )
             return 2
         try:
             result = run_live(secret)

@@ -8,6 +8,15 @@ lineage_origin: generated_from_spec
 
 # Check payer authentication enrollment
 
+<!-- section:prose -->
+## Overview
+
+You use this endpoint to check payer authentication enrollment.
+
+<!-- TODO: Add a short customer-facing example once sandbox samples are approved. -->
+<!-- /section:prose -->
+
+<!-- section:facts -->
 **Method:** `POST`  
 **Path:** `/risk/v1/authentications`  
 **Operation ID:** `checkMppEnrollment`
@@ -54,4 +63,4 @@ Required scheme(s) from the OpenAPI fixture: `httpSignature`.
 
 Every fact on this page traces to the OpenAPI-derived reference unit. Sandbox only — do not use production credentials from these docs.
 
-<!-- section: generated -->
+<!-- /section:facts -->

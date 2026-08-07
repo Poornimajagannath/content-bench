@@ -8,6 +8,15 @@ lineage_origin: generated_from_spec
 
 # Retrieve a TMS customer
 
+<!-- section:prose -->
+## Overview
+
+You use this endpoint to retrieve a TMS customer.
+
+<!-- TODO: Add a short customer-facing example once sandbox samples are approved. -->
+<!-- /section:prose -->
+
+<!-- section:facts -->
 **Method:** `GET`  
 **Path:** `/tms/v2/customers/{customerId}`  
 **Operation ID:** `getCustomer`
@@ -55,4 +64,4 @@ _None listed_
 
 Every fact on this page traces to the OpenAPI-derived reference unit. Sandbox only — do not use production credentials from these docs.
 
-<!-- section: generated -->
+<!-- /section:facts -->

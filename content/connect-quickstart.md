@@ -6,8 +6,15 @@ product: stripe-connect
 
 # Stripe Connect onboarding quickstart
 
-Backend track: create a connected account and an Account Link using your platform test secret key.
-Facts below trace to the local Connect OpenAPI fixture and Connect prose guides.
+<!-- section:prose -->
+## Overview
+
+Follow these steps to create a connected account and an Account Link with your platform test secret key.
+
+<!-- TODO: Confirm any product-specific prerequisites with the owning team. -->
+<!-- /section:prose -->
+
+<!-- section:facts -->
 
 ## 1. Prepare platform test credentials
 
@@ -83,4 +90,4 @@ Facts below trace to the local Connect OpenAPI fixture and Connect prose guides.
 - Missing Connect webhook signing secret configuration
 - Ignoring account.updated and relying only on return_url
 
-<!-- section: generated -->
+<!-- /section:facts -->

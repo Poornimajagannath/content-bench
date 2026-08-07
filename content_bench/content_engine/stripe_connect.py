@@ -39,15 +39,25 @@ def render_endpoint_page(claim: Dict[str, Any]) -> str:
     params = extras.get("parameters") or []
     codes = extras.get("status_codes") or []
     security = extras.get("security") or [{"bearerAuth": []}]
+    title = claim.get("title", method + " " + path)
     lines = [
         "---",
-        f"title: {claim.get('title', method + ' ' + path)}",
+        f"title: {title}",
         "generated: true",
         "source: openapi-connect.fixture.json",
         "---",
         "",
-        f"# {claim.get('title', method + ' ' + path)}",
+        f"# {title}",
         "",
+        "<!-- section:prose -->",
+        "## Overview",
+        "",
+        f"You call `{method} {path}` when you need this Connect operation.",
+        "",
+        "<!-- TODO: Add a short customer-facing example once sandbox samples are approved. -->",
+        "<!-- /section:prose -->",
+        "",
+        "<!-- section:facts -->",
         f"**Method:** `{method}`  ",
         f"**Path:** `{path}`  ",
         f"**Operation ID:** `{extras.get('operation_id', '')}`",
@@ -84,7 +94,7 @@ def render_endpoint_page(claim: Dict[str, Any]) -> str:
             "",
             claim.get("text") or "",
             "",
-            "<!-- section: generated -->",
+            "<!-- /section:facts -->",
             "",
         ]
     )
@@ -236,8 +246,15 @@ def render_quickstart(steps: List[Dict[str, Any]]) -> str:
         "",
         "# Stripe Connect onboarding quickstart",
         "",
-        "Backend track: create a connected account and an Account Link using your platform test secret key.",
-        "Facts below trace to the local Connect OpenAPI fixture and Connect prose guides.",
+        "<!-- section:prose -->",
+        "## Overview",
+        "",
+        "Follow these steps to create a connected account and an Account Link with your platform test secret key.",
+        "",
+        "<!-- TODO: Confirm any product-specific prerequisites with the owning team. -->",
+        "<!-- /section:prose -->",
+        "",
+        "<!-- section:facts -->",
         "",
     ]
     for step in steps:
@@ -259,7 +276,7 @@ def render_quickstart(steps: List[Dict[str, Any]]) -> str:
         for err in step["common_errors"]:
             lines.append(f"- {err}")
         lines.append("")
-    lines.append("<!-- section: generated -->")
+    lines.append("<!-- /section:facts -->")
     lines.append("")
     return "\n".join(lines)
 

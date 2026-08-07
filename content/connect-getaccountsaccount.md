@@ -6,6 +6,15 @@ source: openapi-connect.fixture.json
 
 # GET /v1/accounts/{account}
 
+<!-- section:prose -->
+## Overview
+
+You call `GET /v1/accounts/{account}` when you need this Connect operation.
+
+<!-- TODO: Add a short customer-facing example once sandbox samples are approved. -->
+<!-- /section:prose -->
+
+<!-- section:facts -->
 **Method:** `GET`  
 **Path:** `/v1/accounts/{account}`  
 **Operation ID:** `GetAccountsAccount`
@@ -29,4 +38,4 @@ Security: `[{"bearerAuth": []}]`
 
 Retrieve a connected account
 
-<!-- section: generated -->
+<!-- /section:facts -->

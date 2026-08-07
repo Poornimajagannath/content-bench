@@ -87,6 +87,18 @@ node portal/server.js   # http://127.0.0.1:8787/connect-quickstart
 
 Artifacts: `artifacts/content_engine/stripe/`, `content/connect-*.md`, `evals/latest.md`.
 
+## content-docs MCP (hand testing)
+
+Docs-only agent tools for Cursor / Codex / Claude Code. Answers come from `content/` + generated reference units only; every hand test can log to `evals/manual-runs.jsonl`.
+
+```bash
+cd mcp-server && npm install
+# Cursor: .cursor/mcp.json is checked in (server name: content-docs)
+# Agent contract: agents/doc-agent.md
+```
+
+See `mcp-server/README.md`.
+
 ## PM entrypoints
 
 - `HANDOFF.md` — intent and acceptance criteria

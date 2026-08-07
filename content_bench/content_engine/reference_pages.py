@@ -3,22 +3,46 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence
 
 ROOT = Path(__file__).resolve().parents[2]
-DEFAULT_UNITS_PATH = (
-    ROOT
-    / "artifacts"
-    / "content_engine"
-    / "generated"
-    / "payments-core-openapi.api_reference_units.json"
-)
 CONTENT_DIR = ROOT / "content"
 ARTIFACT_DIR = ROOT / "artifacts" / "content_engine" / "a2"
 
 
-def load_reference_units(path: Path = DEFAULT_UNITS_PATH) -> List[Dict[str, Any]]:
+def default_units_path() -> Path:
+    """Prefer registered payments OpenAPI units; fall back to local fixture units."""
+    generated = ROOT / "artifacts" / "content_engine" / "generated"
+    candidates: List[Path] = []
+    payments = ROOT / "registry" / "payments.json"
+    if payments.is_file():
+        try:
+            sid = json.loads(payments.read_text(encoding="utf-8")).get(
+                "openapi_source_id"
+            )
+            if sid:
+                candidates.append(generated / f"{sid}.api_reference_units.json")
+        except json.JSONDecodeError:
+            pass
+    candidates.extend(
+        [
+            generated / "payments-core-openapi.api_reference_units.json",
+            generated / "cybersource-payments-core-openapi.api_reference_units.json",
+        ]
+    )
+    for path in candidates:
+        if path.is_file():
+            return path
+    return candidates[0]
+
+
+DEFAULT_UNITS_PATH = default_units_path()
+
+
+def load_reference_units(path: Optional[Path] = None) -> List[Dict[str, Any]]:
+    path = path or default_units_path()
     data = json.loads(path.read_text(encoding="utf-8"))
     if isinstance(data, list):
         return data
@@ -79,14 +103,36 @@ def render_reference_page(unit: Dict[str, Any]) -> str:
         "## Auth",
         "",
     ]
-    if auth:
+    platform_auth = any(
+        "getting-started" in str(a).lower() or "http-signature-or-jwt" in str(a).lower()
+        for a in auth
+    )
+    if auth and not platform_auth:
         lines.append(
-            "Required scheme(s) from the OpenAPI fixture: "
+            "Required scheme(s) from the OpenAPI security section: "
             + ", ".join(f"`{a}`" for a in auth)
             + "."
         )
     else:
-        lines.append("_Auth not stated in the reference unit._")
+        lines.append(
+            "This OpenAPI document does not declare `security` / `securityDefinitions` "
+            "for the operation. Authenticate with HTTP Signature or JWT per CyberSource "
+            "REST getting started (sandbox: `apitest.cybersource.com`)."
+        )
+    # Safety: never encourage raw PAN even when field catalogs mention card data.
+    req_names = " ".join(
+        str(f.get("name") or "") for f in (unit.get("request_fields") or [])
+    )
+    if re.search(r"(?i)card\.number|paymentInformation\.card", req_names):
+        lines.extend(
+            [
+                "",
+                "## Safety",
+                "",
+                "Use tokenized instruments or sandbox test values only. "
+                "Do not send raw PAN in production.",
+            ]
+        )
     lines.extend(["", "## Request", ""])
 
     path_params = unit.get("path_params") or []
@@ -168,10 +214,17 @@ def write_reference_pages(
     *,
     content_dir: Path = CONTENT_DIR,
     artifact_dir: Path = ARTIFACT_DIR,
+    clear_existing: bool = True,
 ) -> Dict[str, Any]:
     units = list(units if units is not None else load_reference_units())
     content_dir.mkdir(parents=True, exist_ok=True)
     artifact_dir.mkdir(parents=True, exist_ok=True)
+
+    if clear_existing:
+        for stale in content_dir.glob("*.md"):
+            if stale.name.lower() == "readme.md":
+                continue
+            stale.unlink()
 
     written: List[str] = []
     for unit in units:

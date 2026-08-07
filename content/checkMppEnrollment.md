@@ -1,0 +1,55 @@
+---
+title: Check payer authentication enrollment
+generated: true
+source: doc-payments-core-openapi
+operation_id: checkMppEnrollment
+lineage_origin: generated_from_spec
+---
+
+# Check payer authentication enrollment
+
+**Method:** `POST`  
+**Path:** `/risk/v1/authentications`  
+**Operation ID:** `checkMppEnrollment`
+
+## Auth
+
+Required scheme(s) from the OpenAPI fixture: `httpSignature`.
+
+## Request
+
+### Body fields
+
+| Name | Type | Required | Notes |
+| --- | --- | --- | --- |
+| MppCredentialRequest | object | yes |  |
+
+## Response
+
+| Name | Type | Required | Notes |
+| --- | --- | --- | --- |
+| MppCredential | object |  | Success schema MppCredential |
+
+## Errors
+
+- `error_schema`: Error payload shaped by ErrorResponse — recovery: Inspect reason/details; fix request or auth; retry in sandbox only
+
+## Evidence (from spec)
+
+> "Check payer authentication enrollment"
+
+> "Enrollment may return FRICTIONLESS, CHALLENGE, or UNAVAILABLE paths."
+
+## Related workflows
+
+`microform-payer-auth-state-machine`
+
+## Provenance
+
+- `lineage_origin`: `generated_from_spec`
+- `unit_id`: `payments-core-openapi:ref:checkMppEnrollment`
+- `api_name`: Payment Gateway Payments Core (local Content Bench fixture)
+
+Every fact on this page traces to the OpenAPI-derived reference unit. Sandbox only — do not use production credentials from these docs.
+
+<!-- section: generated -->

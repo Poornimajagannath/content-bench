@@ -1,0 +1,55 @@
+---
+title: Create payer authentication / MPP credential setup
+generated: true
+source: doc-payments-core-openapi
+operation_id: createMppCredentialSetup
+lineage_origin: generated_from_spec
+---
+
+# Create payer authentication / MPP credential setup
+
+**Method:** `POST`  
+**Path:** `/risk/v1/authentication-setups`  
+**Operation ID:** `createMppCredentialSetup`
+
+## Auth
+
+Required scheme(s) from the OpenAPI fixture: `httpSignature`.
+
+## Request
+
+### Body fields
+
+| Name | Type | Required | Notes |
+| --- | --- | --- | --- |
+| MppCredentialRequest | object | yes |  |
+
+## Response
+
+| Name | Type | Required | Notes |
+| --- | --- | --- | --- |
+| MppCredential | object |  | Success schema MppCredential |
+
+## Errors
+
+- `error_schema`: Error payload shaped by ErrorResponse — recovery: Inspect reason/details; fix request or auth; retry in sandbox only
+
+## Evidence (from spec)
+
+> "Create payer authentication / MPP credential setup"
+
+> "Payer Authentication setup prerequisite before enrollment. Microform tokenize alone is not 3DS completion."
+
+## Related workflows
+
+`microform-payer-auth-state-machine`
+
+## Provenance
+
+- `lineage_origin`: `generated_from_spec`
+- `unit_id`: `payments-core-openapi:ref:createMppCredentialSetup`
+- `api_name`: Payment Gateway Payments Core (local Content Bench fixture)
+
+Every fact on this page traces to the OpenAPI-derived reference unit. Sandbox only — do not use production credentials from these docs.
+
+<!-- section: generated -->

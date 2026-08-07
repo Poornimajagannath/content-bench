@@ -14,9 +14,12 @@ Connect lets a platform create and manage connected accounts. You use your **pla
 
 ## Sequence
 
-1. Create a connected account with `POST /v1/accounts`.
+1. Create a connected account with `POST /v1/accounts` using `controller[...]`
+   (`fees.payer`, `losses.payments`, `stripe_dashboard.type`). The legacy `type`
+   parameter is deprecated.
 2. Create an Account Link with `POST /v1/account_links` so the connected account can finish onboarding.
-3. After `details_submitted` is true, you can charge and pay out according to your Connect configuration.
+3. Listen for `account.updated` and check `charges_enabled` / `details_submitted`
+   (avoid polling as your primary signal).
 
 ## Gotchas
 

@@ -34,14 +34,15 @@ Facts below trace to the local Connect OpenAPI fixture and Connect prose guides.
 - Platform test secret key
 
 **Actions**
-1. POST /v1/accounts with type (e.g. express) and country.
+1. POST /v1/accounts with country plus controller[fees][payer], controller[losses][payments], and controller[stripe_dashboard][type] (e.g. express).
 2. Request capabilities such as card_payments and transfers when required by your integration.
-3. Store the returned account id.
+3. Deprecated alternative: the type parameter still exists but prefer controller fields instead of type.
+4. Store the returned account id.
 
 **Expected outcome:** Response includes id starting with acct_.
 
 **Common errors**
-- 400 when type or country is missing
+- 400 when country or required controller fields are missing
 - 401 when the platform key is invalid
 
 ## 3. Create an Account Link
@@ -54,8 +55,9 @@ Facts below trace to the local Connect OpenAPI fixture and Connect prose guides.
 
 **Actions**
 1. POST /v1/account_links with account, type=account_onboarding, return_url, refresh_url.
-2. Redirect the user to the url field in the response.
-3. If the link expires, create a new Account Link for the same account.
+2. Example: set collection_options[fields]=currently_due (or eventually_due) when you need that collection mode.
+3. Redirect the user to the url field in the response.
+4. If the link expires, create a new Account Link for the same account.
 
 **Expected outcome:** Response includes a single-use url and expires_at.
 
@@ -63,20 +65,22 @@ Facts below trace to the local Connect OpenAPI fixture and Connect prose guides.
 - 400 when return_url/refresh_url/type are missing
 - 401 when not using the platform secret key
 
-## 4. Verify onboarding state
+## 4. Confirm onboarding via webhook
 
-**Goal:** Confirm the connected account submitted details.
+**Goal:** Learn when the connected account finished submitting details without polling.
 
 **Prerequisites**
 - Account id
+- Webhook endpoint receiving Connect events
 
 **Actions**
-1. GET /v1/accounts/{account}.
-2. Check details_submitted (and charges_enabled when relevant).
+1. Listen for account.updated on your webhook endpoint.
+2. On account.updated, check charges_enabled and details_submitted instead of polling GET /v1/accounts/{account}.
 
-**Expected outcome:** Account object reflects onboarding progress.
+**Expected outcome:** Webhook payload shows onboarding progress (details_submitted / charges_enabled).
 
 **Common errors**
-- 404 if the account id is wrong
+- Missing Connect webhook signing secret configuration
+- Ignoring account.updated and relying only on return_url
 
 <!-- section: generated -->

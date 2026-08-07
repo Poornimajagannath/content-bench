@@ -2,7 +2,7 @@
 
 - Mode: `mock`
 - Gate: **pass**
-- When: 2026-08-07T04:03:44+00:00
+- When: 2026-08-07T04:45:17+00:00
 - Reason: generated Connect docs contain required onboarding facts
 
 ## Steps

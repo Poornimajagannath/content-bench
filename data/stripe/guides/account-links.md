@@ -14,6 +14,12 @@ Account Links are single-use URLs for Stripe-hosted onboarding or account update
 - `refresh_url` — where to send the user if the link expires
 - `return_url` — where to send the user after they finish
 
+## Optional parameters
+
+- `collection_options[fields]` — `currently_due` (default) or `eventually_due`.
+  Example: collect only what is due now with
+  `collection_options[fields]=currently_due`.
+
 ## Sequencing advice
 
 Create the Account **before** the Account Link. Do not invent account ids.

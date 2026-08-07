@@ -17,9 +17,9 @@ Security: `[{"bearerAuth": []}]`
 
 ## Parameters
 
-| Name | In | Required | Type |
-| --- | --- | --- | --- |
-| account | path | True | string |
+| Name | In | Required | Type | Description |
+| --- | --- | --- | --- | --- |
+| account | path | True | string |  |
 
 ## Status codes
 

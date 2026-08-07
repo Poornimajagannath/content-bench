@@ -68,6 +68,20 @@ class StripeConnectTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             run_live("sk_live_fake")
 
+    def test_accounts_page_teaches_controller_marks_type_deprecated(self):
+        run_stripe_connect_proof(stamp_date="2026-08-07")
+        accounts = (ROOT / "content" / "connect-postaccounts.md").read_text(encoding="utf-8")
+        self.assertIn("controller[fees][payer]", accounts)
+        self.assertIn("controller[losses][payments]", accounts)
+        self.assertIn("controller[stripe_dashboard][type]", accounts)
+        # type remains only as a deprecated alternative
+        self.assertRegex(accounts, r"(?i)deprecated")
+        self.assertIn("| type |", accounts)
+        quickstart = (ROOT / "content" / "connect-quickstart.md").read_text(encoding="utf-8")
+        self.assertIn("controller[", quickstart)
+        self.assertIn("collection_options[fields]=currently_due", quickstart)
+        self.assertIn("account.updated", quickstart)
+
 
 if __name__ == "__main__":
     unittest.main()

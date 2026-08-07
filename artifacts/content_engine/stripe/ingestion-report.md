@@ -2,11 +2,11 @@
 
 Milestone 0.5: corpus cleaned at the door. `raw/` is immutable evidence; serve layers read only `normalized/` and `content/`.
 
-- Stamp date: `2026-08-06`
+- Stamp date: `2026-08-07`
 - Docs fetched into raw: 4
 - Claims extracted: 30
-- Raw dir: `raw/2026-08-06`
-- Normalized file: `normalized/2026-08-06.claims.json`
+- Raw dir: `raw/2026-08-07`
+- Normalized file: `normalized/2026-08-07.claims.json`
 - Read contract: normalized/, content/
 - Forbidden: raw/
 
@@ -23,5 +23,8 @@ Milestone 0.5: corpus cleaned at the door. `raw/` is immutable evidence; serve l
 
 | Path | Reason | Detail |
 | --- | --- | --- |
-| 2026-08-06/account-links.md | no_schema_match | no quickstart/endpoint/error/prose claim extracted |
-| 2026-08-06/openapi-connect.fixture.json | no_schema_match | no quickstart/endpoint/error/prose claim extracted |
+| 2026-08-07/account-links.md | raw_immutable_conflict | refusing to overwrite differing raw file |
+| 2026-08-07/how-connect-works.md | raw_immutable_conflict | refusing to overwrite differing raw file |
+| 2026-08-07/onboarding-quickstart.md | raw_immutable_conflict | refusing to overwrite differing raw file |
+| 2026-08-07/account-links.md | no_schema_match | no quickstart/endpoint/error/prose claim extracted |
+| 2026-08-07/openapi-connect.fixture.json | no_schema_match | no quickstart/endpoint/error/prose claim extracted |

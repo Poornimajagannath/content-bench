@@ -113,8 +113,10 @@ def run_live(secret: str) -> Dict[str, Any]:
         "/v1/accounts",
         secret,
         {
-            "type": "express",
             "country": "US",
+            "controller[fees][payer]": "application",
+            "controller[losses][payments]": "application",
+            "controller[stripe_dashboard][type]": "express",
             "capabilities[card_payments][requested]": "true",
             "capabilities[transfers][requested]": "true",
         },

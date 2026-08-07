@@ -6,21 +6,31 @@
     "description": "Trimmed local fixture for Content Bench content-engine proof. Not the full Stripe OpenAPI. Derived from public Stripe API shapes for Accounts and Account Links."
   },
   "servers": [
-    {"url": "https://api.stripe.com"}
+    {
+      "url": "https://api.stripe.com"
+    }
   ],
-  "security": [{"bearerAuth": []}],
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
   "paths": {
     "/v1/accounts": {
       "post": {
         "operationId": "PostAccounts",
         "summary": "Create a connected account",
-        "tags": ["Connect"],
+        "tags": [
+          "Connect"
+        ],
         "parameters": [
           {
             "name": "Stripe-Version",
             "in": "header",
             "required": false,
-            "schema": {"type": "string"}
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -29,18 +39,65 @@
             "application/x-www-form-urlencoded": {
               "schema": {
                 "type": "object",
+                "required": [
+                  "country",
+                  "controller[fees][payer]",
+                  "controller[losses][payments]",
+                  "controller[stripe_dashboard][type]"
+                ],
                 "properties": {
+                  "country": {
+                    "type": "string",
+                    "description": "Two-letter country code"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "description": "Email for the connected account"
+                  },
+                  "controller[fees][payer]": {
+                    "type": "string",
+                    "enum": [
+                      "application",
+                      "account"
+                    ],
+                    "description": "Who pays Stripe fees (controller pattern)"
+                  },
+                  "controller[losses][payments]": {
+                    "type": "string",
+                    "enum": [
+                      "application",
+                      "stripe"
+                    ],
+                    "description": "Who is liable for negative balances (controller pattern)"
+                  },
+                  "controller[stripe_dashboard][type]": {
+                    "type": "string",
+                    "enum": [
+                      "express",
+                      "full",
+                      "none"
+                    ],
+                    "description": "Dashboard access for the connected account (controller pattern)"
+                  },
+                  "capabilities[card_payments][requested]": {
+                    "type": "boolean",
+                    "description": "Request card_payments capability"
+                  },
+                  "capabilities[transfers][requested]": {
+                    "type": "boolean",
+                    "description": "Request transfers capability"
+                  },
                   "type": {
                     "type": "string",
-                    "enum": ["express", "standard", "custom"],
-                    "description": "Connected account type"
-                  },
-                  "country": {"type": "string", "description": "Two-letter country code"},
-                  "email": {"type": "string", "format": "email"},
-                  "capabilities[card_payments][requested]": {"type": "boolean"},
-                  "capabilities[transfers][requested]": {"type": "boolean"}
-                },
-                "required": ["type", "country"]
+                    "enum": [
+                      "express",
+                      "standard",
+                      "custom"
+                    ],
+                    "description": "Deprecated. Prefer controller[stripe_dashboard][type] and related controller fields instead of type."
+                  }
+                }
               }
             }
           }
@@ -50,29 +107,44 @@
             "description": "Account created",
             "content": {
               "application/json": {
-                "schema": {"$ref": "#/components/schemas/Account"}
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
               }
             }
           },
-          "400": {"description": "Invalid request"},
-          "401": {"description": "Unauthorized — missing or invalid platform secret key"}
+          "400": {
+            "description": "Invalid request"
+          },
+          "401": {
+            "description": "Unauthorized \u2014 missing or invalid platform secret key"
+          }
         }
       },
       "get": {
         "operationId": "GetAccounts",
         "summary": "List connected accounts",
-        "tags": ["Connect"],
+        "tags": [
+          "Connect"
+        ],
         "parameters": [
           {
             "name": "limit",
             "in": "query",
             "required": false,
-            "schema": {"type": "integer", "maximum": 100}
+            "schema": {
+              "type": "integer",
+              "maximum": 100
+            }
           }
         ],
         "responses": {
-          "200": {"description": "List of accounts"},
-          "401": {"description": "Unauthorized"}
+          "200": {
+            "description": "List of accounts"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
         }
       }
     },
@@ -80,13 +152,18 @@
       "get": {
         "operationId": "GetAccountsAccount",
         "summary": "Retrieve a connected account",
-        "tags": ["Connect"],
+        "tags": [
+          "Connect"
+        ],
         "parameters": [
           {
             "name": "account",
             "in": "path",
             "required": true,
-            "schema": {"type": "string", "description": "Account id (acct_...)"}
+            "schema": {
+              "type": "string",
+              "description": "Account id (acct_...)"
+            }
           }
         ],
         "responses": {
@@ -94,12 +171,18 @@
             "description": "Account",
             "content": {
               "application/json": {
-                "schema": {"$ref": "#/components/schemas/Account"}
+                "schema": {
+                  "$ref": "#/components/schemas/Account"
+                }
               }
             }
           },
-          "404": {"description": "Account not found"},
-          "401": {"description": "Unauthorized"}
+          "404": {
+            "description": "Account not found"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
         }
       }
     },
@@ -107,7 +190,9 @@
       "post": {
         "operationId": "PostAccountLinks",
         "summary": "Create an Account Link for onboarding",
-        "tags": ["Connect"],
+        "tags": [
+          "Connect"
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -131,11 +216,35 @@
                   },
                   "type": {
                     "type": "string",
-                    "enum": ["account_onboarding", "account_update"],
+                    "enum": [
+                      "account_onboarding",
+                      "account_update"
+                    ],
                     "description": "Link purpose"
+                  },
+                  "collection_options[fields]": {
+                    "type": "string",
+                    "enum": [
+                      "currently_due",
+                      "eventually_due"
+                    ],
+                    "description": "Which requirements to collect. Example: currently_due (default) vs eventually_due."
+                  },
+                  "collection_options[future_requirements]": {
+                    "type": "string",
+                    "enum": [
+                      "include",
+                      "omit"
+                    ],
+                    "description": "Whether to collect future_requirements (default omit)."
                   }
                 },
-                "required": ["account", "refresh_url", "return_url", "type"]
+                "required": [
+                  "account",
+                  "refresh_url",
+                  "return_url",
+                  "type"
+                ]
               }
             }
           }
@@ -145,12 +254,18 @@
             "description": "Account Link created",
             "content": {
               "application/json": {
-                "schema": {"$ref": "#/components/schemas/AccountLink"}
+                "schema": {
+                  "$ref": "#/components/schemas/AccountLink"
+                }
               }
             }
           },
-          "400": {"description": "Invalid parameters"},
-          "401": {"description": "Unauthorized"}
+          "400": {
+            "description": "Invalid parameters"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
         }
       }
     }
@@ -168,23 +283,54 @@
       "Account": {
         "type": "object",
         "properties": {
-          "id": {"type": "string"},
-          "object": {"type": "string", "enum": ["account"]},
-          "type": {"type": "string"},
-          "country": {"type": "string"},
-          "email": {"type": "string"},
-          "charges_enabled": {"type": "boolean"},
-          "payouts_enabled": {"type": "boolean"},
-          "details_submitted": {"type": "boolean"}
+          "id": {
+            "type": "string"
+          },
+          "object": {
+            "type": "string",
+            "enum": [
+              "account"
+            ]
+          },
+          "type": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "charges_enabled": {
+            "type": "boolean"
+          },
+          "payouts_enabled": {
+            "type": "boolean"
+          },
+          "details_submitted": {
+            "type": "boolean"
+          }
         }
       },
       "AccountLink": {
         "type": "object",
         "properties": {
-          "object": {"type": "string", "enum": ["account_link"]},
-          "created": {"type": "integer"},
-          "expires_at": {"type": "integer"},
-          "url": {"type": "string", "format": "uri"}
+          "object": {
+            "type": "string",
+            "enum": [
+              "account_link"
+            ]
+          },
+          "created": {
+            "type": "integer"
+          },
+          "expires_at": {
+            "type": "integer"
+          },
+          "url": {
+            "type": "string",
+            "format": "uri"
+          }
         }
       }
     }

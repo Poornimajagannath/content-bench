@@ -17,12 +17,14 @@ Security: `[{"bearerAuth": []}]`
 
 ## Parameters
 
-| Name | In | Required | Type |
-| --- | --- | --- | --- |
-| account | body | True | string |
-| refresh_url | body | True | string |
-| return_url | body | True | string |
-| type | body | True | string |
+| Name | In | Required | Type | Description |
+| --- | --- | --- | --- | --- |
+| account | body | True | string | Connected account id |
+| refresh_url | body | True | string | URL if the link expires |
+| return_url | body | True | string | URL after onboarding |
+| type | body | True | string | Link purpose |
+| collection_options[fields] | body | False | string | Which requirements to collect. Example: currently_due (default) vs eventually_due. |
+| collection_options[future_requirements] | body | False | string | Whether to collect future_requirements (default omit). |
 
 ## Status codes
 

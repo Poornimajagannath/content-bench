@@ -1,0 +1,43 @@
+name: Stripe docs parity (nightly)
+
+# Live upstream parity — evidence for the improvement loop, never a PR gate.
+on:
+  schedule:
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  parity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run parity compare (live upstream, evidence only)
+        # --evidence always exits 0; findings are loop evidence, never build failures.
+        run: python3 evals/run_stripe_docs_compare.py --evidence
+      - name: Upload parity report artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stripe-docs-parity
+          path: |
+            evals/stripe-docs-compare.md
+            evals/runs/stripe-docs-compare.json
+      - name: Commit report into evals/ (evidence)
+        if: always()
+        continue-on-error: true
+        run: |
+          git config user.name "content-bench-parity-bot"
+          git config user.email "parity-bot@users.noreply.github.com"
+          git add evals/stripe-docs-compare.md evals/runs/stripe-docs-compare.json
+          if git diff --staged --quiet; then
+            echo "No report changes"
+            exit 0
+          fi
+          git commit -m "chore(evals): nightly Stripe docs parity report"
+          git push origin "HEAD:${GITHUB_REF_NAME}"

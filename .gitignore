@@ -16,6 +16,16 @@ normalized/*.claims.json
 
 # Eval traces (regenerable)
 evals/runs/*.json
+evals/latest.md
+
+# Always rewritten by Connect proof / unittest runs — publish deliberately via pipelines
+artifacts/content_engine/stripe/ingestion-report.md
+artifacts/content_engine/stripe/ingestion-report.json
+artifacts/content_engine/stripe/source-mix-report.md
+artifacts/content_engine/stripe/source-mix-report.json
+
+# Local scratch (tests / ad-hoc runs)
+.scratch/
 
 mcp-server/node_modules/
 evals/manual-runs.jsonl

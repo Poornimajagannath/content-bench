@@ -61,6 +61,9 @@ class DropRecord:
     path: str
     reason: str
     detail: str = ""
+    # Triage fields — required when reason == "shell"
+    bytes: Optional[int] = None
+    first_heading: Optional[str] = None
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)
@@ -143,14 +146,79 @@ def stamp_copy_to_raw(
     return dest_dir, metas, drops
 
 
+# Shared triage heuristics live in triage.py — the one definition used by all
+# callers. Do not re-implement locally.
+from content_bench.content_engine.triage import (  # noqa: E402
+    constraint_kind as _constraint_kind,
+    first_heading as _first_heading,
+    iter_sentences as _iter_sentences,
+    looks_like_shell as _looks_like_shell,
+)
+
+
 def _should_drop_doc(text: str, path: Path) -> Optional[str]:
     for pattern, reason in _DROP_PATTERNS:
         if pattern.search(text) or pattern.search(path.name):
             return reason
-    # Near-empty
-    if len(text.strip()) < 40:
+    # Near-empty — length alone is not emptiness; only truly blank stubs
+    if len(text.strip()) < 20:
         return "empty_or_stub"
     return None
+
+
+def _extract_prose_claims(
+    text: str,
+    *,
+    source_pointer: str,
+    doc_stem: str,
+) -> List[NormalizedClaim]:
+    claims: List[NormalizedClaim] = []
+    seen: set[str] = set()
+
+    for sentence in _iter_sentences(text):
+        kind = _constraint_kind(sentence)
+        if not kind:
+            continue
+        if re.search(r"revision history|table of contents", sentence, re.I):
+            continue
+        key = hashlib.sha1(sentence.encode()).hexdigest()[:12]
+        if key in seen:
+            continue
+        seen.add(key)
+        claims.append(
+            NormalizedClaim(
+                claim_id=f"{doc_stem}:prose:{key}",
+                schema="prose_claim",
+                title=sentence[:100],
+                text=sentence[:500],
+                source_pointer=source_pointer,
+                extras={"claim_kind": kind},
+            )
+        )
+
+    for match in re.finditer(
+        r"(?m)^(?:[-*]\s+|(?:You|Developers?|Merchants?|After you)\s+)(.{20,500}[.!?])\s*$",
+        text,
+    ):
+        sentence = match.group(0).strip()
+        if re.search(r"revision history|table of contents", sentence, re.I):
+            continue
+        key = hashlib.sha1(sentence.encode()).hexdigest()[:12]
+        if key in seen:
+            continue
+        seen.add(key)
+        claims.append(
+            NormalizedClaim(
+                claim_id=f"{doc_stem}:prose:{key}",
+                schema="prose_claim",
+                title=sentence[:100],
+                text=sentence[:500],
+                source_pointer=source_pointer,
+                extras={"claim_kind": "guidance"},
+            )
+        )
+
+    return claims
 
 
 def _extract_claims_from_text(
@@ -161,9 +229,21 @@ def _extract_claims_from_text(
 ) -> Tuple[List[NormalizedClaim], List[DropRecord]]:
     claims: List[NormalizedClaim] = []
     drops: List[DropRecord] = []
+    byte_len = len(text.encode("utf-8", errors="replace"))
+    heading = _first_heading(text)
+
     drop_reason = _should_drop_doc(text, Path(doc_stem))
     if drop_reason:
-        drops.append(DropRecord(path=source_pointer, reason=drop_reason))
+        reason = "shell" if drop_reason in {"index_page", "empty_or_stub"} else drop_reason
+        drops.append(
+            DropRecord(
+                path=source_pointer,
+                reason=reason,
+                detail=drop_reason,
+                bytes=byte_len,
+                first_heading=heading or "(no heading)",
+            )
+        )
         return claims, drops
 
     # Quickstart steps: numbered headings or numbered lists
@@ -217,39 +297,33 @@ def _extract_claims_from_text(
             )
         )
 
-    # Prose claims: imperative / guidance sentences with a pointer
-    for match in re.finditer(
-        r"(?m)^(?:[-*]\s+|(?:You|Developers?|Merchants?)\s+)(.{20,220}[.!?])\s*$",
-        text,
-    ):
-        sentence = match.group(0).strip()
-        if re.search(r"revision history|table of contents", sentence, re.I):
+    claims.extend(
+        _extract_prose_claims(
+            text, source_pointer=source_pointer, doc_stem=doc_stem
+        )
+    )
+
+    if not claims:
+        if _looks_like_shell(text, byte_len):
+            drops.append(
+                DropRecord(
+                    path=source_pointer,
+                    reason="shell",
+                    detail="no extractable claims; triage as shell (bytes + heading required)",
+                    bytes=byte_len,
+                    first_heading=heading or "(no heading)",
+                )
+            )
+        else:
             drops.append(
                 DropRecord(
                     path=source_pointer,
                     reason="no_schema_match",
-                    detail="navigation/history sentence",
+                    detail="no quickstart/endpoint/error/prose claim extracted",
+                    bytes=byte_len,
+                    first_heading=heading or "(no heading)",
                 )
             )
-            continue
-        claims.append(
-            NormalizedClaim(
-                claim_id=f"{doc_stem}:prose:{hashlib.sha1(sentence.encode()).hexdigest()[:8]}",
-                schema="prose_claim",
-                title=sentence[:80],
-                text=sentence,
-                source_pointer=source_pointer,
-            )
-        )
-
-    if not claims:
-        drops.append(
-            DropRecord(
-                path=source_pointer,
-                reason="no_schema_match",
-                detail="no quickstart/endpoint/error/prose claim extracted",
-            )
-        )
     return claims, drops
 
 
@@ -311,12 +385,17 @@ def normalize_raw_dir(
     for path in sorted(raw_dir.iterdir()):
         if not path.is_file() or path.name.endswith(".meta.json"):
             continue
-        if path.suffix not in {".md", ".txt", ".json"}:
+        # OpenAPI JSON is handled below via extract_openapi_endpoint_facts.
+        if path.suffix == ".json":
+            continue
+        if path.suffix not in {".md", ".txt"} and not path.name.endswith(".md.md"):
             all_drops.append(
                 DropRecord(
                     path=str(path.relative_to(raw_dir.parent)),
                     reason="no_schema_match",
                     detail=f"unsupported extension {path.suffix}",
+                    bytes=path.stat().st_size,
+                    first_heading="(no heading)",
                 )
             )
             continue
@@ -439,6 +518,7 @@ def render_ingestion_report(report: Dict[str, Any]) -> str:
         f"- Stamp date: `{report['stamp_date']}`",
         f"- Docs fetched into raw: {report['docs_fetched']}",
         f"- Claims extracted: {report['claims_extracted']}",
+        f"- Drop count: {report.get('drop_count', len(report.get('drops') or []))}",
         f"- Raw dir: `{report['raw_dir']}`",
         f"- Normalized file: `{report['normalized_file']}`",
         f"- Read contract: {', '.join(report['read_contract'])}",
@@ -455,11 +535,38 @@ def render_ingestion_report(report: Dict[str, Any]) -> str:
     if not report["drops"]:
         lines.append("_No drops._")
     else:
-        lines.append("| Path | Reason | Detail |")
-        lines.append("| --- | --- | --- |")
+        lines.append("| Path | Reason | Bytes | First heading | Detail |")
+        lines.append("| --- | --- | ---: | --- | --- |")
         for d in report["drops"][:200]:
-            lines.append(f"| {d['path']} | {d['reason']} | {d.get('detail') or '—'} |")
+            heading = (d.get("first_heading") or "—").replace("|", "\\|")
+            b = d.get("bytes")
+            b_s = str(b) if b is not None else "—"
+            if d.get("reason") == "shell" and (b is None or not d.get("first_heading")):
+                heading = f"⚠ MISSING TRIAGE FIELDS — {heading}"
+            lines.append(
+                f"| {d['path']} | {d['reason']} | {b_s} | {heading} | {d.get('detail') or '—'} |"
+            )
         if len(report["drops"]) > 200:
-            lines.append(f"| … | … | {len(report['drops']) - 200} more |")
+            lines.append(
+                f"| … | … | … | … | {len(report['drops']) - 200} more |"
+            )
+        sample = report.get("human_check_sample") or report["drops"][:10]
+        lines.extend(
+            [
+                "",
+                "## Sampled human check (10 drops)",
+                "",
+                "Do not triage by filename alone. For each row confirm shell vs missed claim.",
+                "",
+                "| # | Path | Reason | Bytes | First heading |",
+                "| ---: | --- | --- | ---: | --- |",
+            ]
+        )
+        for i, d in enumerate(sample[:10], 1):
+            heading = (d.get("first_heading") or "—").replace("|", "\\|")
+            b = d.get("bytes")
+            lines.append(
+                f"| {i} | `{d['path']}` | {d['reason']} | {b if b is not None else '—'} | {heading} |"
+            )
     lines.append("")
     return "\n".join(lines)

@@ -1,0 +1,12 @@
+# Connect eval latest
+
+- Mode: `live`
+- Gate: **fail**
+- When: 2026-08-07T05:53:14+00:00
+- Reason: account creation failed
+
+## Steps
+
+| Step | Result | Detail |
+| --- | --- | --- |
+| create_account | fail | {"message": "Stripe no longer recommends Accounts v1 for new Connect integrations. Create connected accounts with POST /v2/core/accounts instead: https://docs.stripe.com/api/v2/core/accounts. Read more about Accounts v2: https://docs.stripe.com/connect/accounts-v2/account-creation. If your integration requires v1 account creation for a supported compatibility scenario, enable Accounts v1 support in the Dashboard: https://dashboard.stripe.com/settings/features/feat_accounts_v1_support. For agent-based integrations, use Stripe's current best-practices skill: npx skills add stripe/ai.", "request_log_url": "https://dashboard.stripe.com/acct_REDACTED_PLATFORM/test/workbench/logs?object=req_REDACTED", "type": "invalid_request_error"} |

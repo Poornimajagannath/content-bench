@@ -218,7 +218,16 @@ def main() -> int:
     else:
         secret = os.environ.get("STRIPE_TEST_SECRET_KEY", "").strip()
         if not secret:
-            print("STRIPE_TEST_SECRET_KEY not set", file=sys.stderr)
+            # Allow STRIPE_SECRET_KEY when it is already a test-mode key.
+            fallback = os.environ.get("STRIPE_SECRET_KEY", "").strip()
+            if fallback.startswith("sk_test_"):
+                secret = fallback
+        if not secret:
+            print(
+                "STRIPE_TEST_SECRET_KEY not set "
+                "(or STRIPE_SECRET_KEY sk_test_ fallback)",
+                file=sys.stderr,
+            )
             return 2
         try:
             result = run_live(secret)

@@ -6,6 +6,15 @@ source: openapi-connect.fixture.json
 
 # POST /v1/accounts
 
+<!-- section:prose -->
+## Overview
+
+You call `POST /v1/accounts` when you need this Connect operation.
+
+<!-- TODO: Add a short customer-facing example once sandbox samples are approved. -->
+<!-- /section:prose -->
+
+<!-- section:facts -->
 **Method:** `POST`  
 **Path:** `/v1/accounts`  
 **Operation ID:** `PostAccounts`
@@ -37,4 +46,4 @@ Security: `[{"bearerAuth": []}]`
 
 Create a connected account
 
-<!-- section: generated -->
+<!-- /section:facts -->

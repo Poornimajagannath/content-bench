@@ -8,6 +8,15 @@ lineage_origin: generated_from_spec
 
 # Create payer authentication / MPP credential setup
 
+<!-- section:prose -->
+## Overview
+
+You use this endpoint to create payer authentication / MPP credential setup.
+
+<!-- TODO: Add a short customer-facing example once sandbox samples are approved. -->
+<!-- /section:prose -->
+
+<!-- section:facts -->
 **Method:** `POST`  
 **Path:** `/risk/v1/authentication-setups`  
 **Operation ID:** `createMppCredentialSetup`
@@ -54,4 +63,4 @@ Required scheme(s) from the OpenAPI fixture: `httpSignature`.
 
 Every fact on this page traces to the OpenAPI-derived reference unit. Sandbox only — do not use production credentials from these docs.
 
-<!-- section: generated -->
+<!-- /section:facts -->

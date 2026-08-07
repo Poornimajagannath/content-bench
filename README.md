@@ -65,13 +65,18 @@ python3 pipelines/run_bench_v0.py --workflow microform-payer-auth-state-machine
 python3 pipelines/run_source_mix.py
 python3 pipelines/run_ingestion_snapshot.py
 python3 pipelines/run_reference_pages_a2.py   # A2: OpenAPI reference units → content/*.md
+python3 pipelines/write_prose.py              # A3: draft Overview prose (facts untouched)
+python3 pipelines/humanize.py                 # A3: customer-voice rewrite (fact_hash guarded)
 python3 scripts/check_content_render.py
 node portal/server.js   # http://127.0.0.1:8787 — serves content/*.md only
 ```
 
 Reports: `artifacts/content_engine/source-mix-report.md`, `artifacts/content_engine/ingestion-report.md`.
 A2 pages carry `lineage_origin: generated_from_spec` (e.g. `content/createPayment.md`).
+A3 rewrites only `<!-- section:prose -->`; templated facts in `<!-- section:facts -->` are
+protected by `fact_hash` (`tests/test_humanizer.py::test_humanizer_cannot_change_templated_fact`).
 Serve layers read `normalized/` + `content/` only — never `raw/`.
+Style guide: `style/customer-voice.md` (ten rules; edit the file to improve voice).
 
 
 ## Stripe Connect proof

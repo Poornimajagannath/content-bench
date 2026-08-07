@@ -63,6 +63,15 @@ def render_reference_page(unit: Dict[str, Any]) -> str:
         "",
         f"# {summary}",
         "",
+        "<!-- section:prose -->",
+        "## Overview",
+        "",
+        f"You use this endpoint to {summary[0].lower() + summary[1:] if summary else 'call the API'}.",
+        "",
+        "<!-- TODO: Add a short customer-facing example once sandbox samples are approved. -->",
+        "<!-- /section:prose -->",
+        "",
+        "<!-- section:facts -->",
         f"**Method:** `{method}`  ",
         f"**Path:** `{endpoint}`  ",
         f"**Operation ID:** `{op}`",
@@ -140,7 +149,7 @@ def render_reference_page(unit: Dict[str, Any]) -> str:
             "Every fact on this page traces to the OpenAPI-derived reference unit. "
             "Sandbox only — do not use production credentials from these docs.",
             "",
-            "<!-- section: generated -->",
+            "<!-- /section:facts -->",
             "",
         ]
     )

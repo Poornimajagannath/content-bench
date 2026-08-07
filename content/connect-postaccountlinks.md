@@ -6,6 +6,15 @@ source: openapi-connect.fixture.json
 
 # POST /v1/account_links
 
+<!-- section:prose -->
+## Overview
+
+You call `POST /v1/account_links` when you need this Connect operation.
+
+<!-- TODO: Add a short customer-facing example once sandbox samples are approved. -->
+<!-- /section:prose -->
+
+<!-- section:facts -->
 **Method:** `POST`  
 **Path:** `/v1/account_links`  
 **Operation ID:** `PostAccountLinks`
@@ -34,4 +43,4 @@ Security: `[{"bearerAuth": []}]`
 
 Create an Account Link for onboarding
 
-<!-- section: generated -->
+<!-- /section:facts -->

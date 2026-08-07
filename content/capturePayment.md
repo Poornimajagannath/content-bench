@@ -8,6 +8,15 @@ lineage_origin: generated_from_spec
 
 # Capture an authorized payment
 
+<!-- section:prose -->
+## Overview
+
+You use this endpoint to capture an authorized payment.
+
+<!-- TODO: Add a short customer-facing example once sandbox samples are approved. -->
+<!-- /section:prose -->
+
+<!-- section:facts -->
 **Method:** `POST`  
 **Path:** `/pts/v2/payments/{id}/captures`  
 **Operation ID:** `capturePayment`
@@ -59,4 +68,4 @@ Required scheme(s) from the OpenAPI fixture: `httpSignature`.
 
 Every fact on this page traces to the OpenAPI-derived reference unit. Sandbox only — do not use production credentials from these docs.
 
-<!-- section: generated -->
+<!-- /section:facts -->

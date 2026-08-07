@@ -1,6 +1,7 @@
 name: Stripe docs parity (nightly)
 
 # Live upstream parity — evidence for the improvement loop, never a PR gate.
+# Writes reports to branch evidence/stripe-docs-parity only (not main).
 on:
   schedule:
     - cron: "17 7 * * *"
@@ -14,6 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -28,16 +31,34 @@ jobs:
           path: |
             evals/stripe-docs-compare.md
             evals/runs/stripe-docs-compare.json
-      - name: Commit report into evals/ (evidence)
+      - name: Push report to evidence branch (not main)
         if: always()
         continue-on-error: true
         run: |
+          set -euo pipefail
+          BRANCH=evidence/stripe-docs-parity
           git config user.name "content-bench-parity-bot"
           git config user.email "parity-bot@users.noreply.github.com"
+
+          mkdir -p /tmp/parity-evidence/evals/runs
+          cp -f evals/stripe-docs-compare.md /tmp/parity-evidence/evals/ || true
+          cp -f evals/runs/stripe-docs-compare.json /tmp/parity-evidence/evals/runs/ || true
+
+          git fetch origin "$BRANCH" 2>/dev/null || true
+          if git rev-parse --verify "origin/$BRANCH" >/dev/null 2>&1; then
+            git checkout -B "$BRANCH" "origin/$BRANCH"
+          else
+            git checkout -B "$BRANCH"
+          fi
+
+          mkdir -p evals/runs
+          cp -f /tmp/parity-evidence/evals/stripe-docs-compare.md evals/
+          cp -f /tmp/parity-evidence/evals/runs/stripe-docs-compare.json evals/runs/
+
           git add evals/stripe-docs-compare.md evals/runs/stripe-docs-compare.json
           if git diff --staged --quiet; then
             echo "No report changes"
             exit 0
           fi
           git commit -m "chore(evals): nightly Stripe docs parity report"
-          git push origin "HEAD:${GITHUB_REF_NAME}"
+          git push -u origin "$BRANCH"

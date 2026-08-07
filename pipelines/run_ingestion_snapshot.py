@@ -20,25 +20,40 @@ from content_bench.content_engine.ingest import (  # noqa: E402
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Ingestion snapshot (M0.5)")
-    parser.add_argument("--docs-dir", default=str(ROOT / "gateway-docs"))
+    parser.add_argument(
+        "--docs-dir", default=str(ROOT / "data/products/payments/guides")
+    )
     parser.add_argument("--raw-root", default=str(ROOT / "raw"))
     parser.add_argument("--normalized-root", default=str(ROOT / "normalized"))
     parser.add_argument(
         "--openapi",
-        default=str(ROOT / "data/content_engine/specs/payments-core.openapi.json"),
+        default=str(
+            ROOT / "data/content_engine/specs/cybersource-payments-core.openapi.json"
+        ),
     )
     parser.add_argument("--stamp-date", default=None, help="YYYY-MM-DD (default: today)")
-    parser.add_argument("--sample-limit", type=int, default=60)
+    parser.add_argument(
+        "--sample-limit",
+        type=int,
+        default=500,
+        help="Wave 1: cover the full payments guide set (not a sample)",
+    )
     parser.add_argument(
         "--out",
-        default=str(ROOT / "artifacts/content_engine/ingestion-report.md"),
+        default=str(ROOT / "artifacts/content_engine/payments/ingestion-report.md"),
     )
     parser.add_argument(
         "--json-out",
-        default=str(ROOT / "artifacts/content_engine/ingestion-report.json"),
+        default=str(ROOT / "artifacts/content_engine/payments/ingestion-report.json"),
+    )
+    parser.add_argument(
+        "--quarantine-list",
+        default=str(ROOT / "artifacts/content_engine/corpus/quarantine-list.json"),
+        help="Census quarantine-list.json; paths listed are skipped (policy)",
     )
     args = parser.parse_args()
 
+    quar = Path(args.quarantine_list)
     report = run_ingestion_snapshot(
         docs_dir=Path(args.docs_dir),
         raw_root=Path(args.raw_root),
@@ -46,6 +61,7 @@ def main() -> int:
         openapi_path=Path(args.openapi),
         stamp_date=args.stamp_date,
         sample_limit=args.sample_limit,
+        quarantine_list_path=quar if quar.is_file() else None,
     )
     md = render_ingestion_report(report)
     out = Path(args.out)

@@ -1,12 +1,13 @@
 # Connect eval latest
 
 - Mode: `live`
-- Gate: **fail**
-- When: 2026-08-07T05:53:14+00:00
-- Reason: account creation failed
+- Gate: **pass**
+- When: 2026-08-07T06:15:17+00:00
+- Reason: created connected account (v2) + Account Link in Samaya test mode
 
 ## Steps
 
 | Step | Result | Detail |
 | --- | --- | --- |
-| create_account | fail | {"message": "Stripe no longer recommends Accounts v1 for new Connect integrations. Create connected accounts with POST /v2/core/accounts instead: https://docs.stripe.com/api/v2/core/accounts. Read more about Accounts v2: https://docs.stripe.com/connect/accounts-v2/account-creation. If your integration requires v1 account creation for a supported compatibility scenario, enable Accounts v1 support in the Dashboard: https://dashboard.stripe.com/settings/features/feat_accounts_v1_support. For agent-based integrations, use Stripe's current best-practices skill: npx skills add stripe/ai.", "request_log_url": "https://dashboard.stripe.com/acct_REDACTED_PLATFORM/test/workbench/logs?object=req_REDACTED", "type": "invalid_request_error"} |
+| create_account | pass | {"fallback": "Accounts v1 disabled on platform; used Samaya v2 path", "error_or_id": "acct_1U1h3kDpnlkOf6fE"} |
+| create_account_link | pass | {"expires_at": 1786083617} |

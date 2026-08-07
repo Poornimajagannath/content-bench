@@ -22,13 +22,15 @@ Required scheme(s) from the OpenAPI fixture: `httpSignature`.
 
 | Name | Type | Required | Notes |
 | --- | --- | --- | --- |
-| CustomerRequest | object | yes |  |
+| buyerInformation | object | yes |  |
+| clientReferenceInformation | object | no |  |
 
 ## Response
 
 | Name | Type | Required | Notes |
 | --- | --- | --- | --- |
-| Customer | object |  | Success schema Customer |
+| id | string | no |  |
+| buyerInformation | object | no |  |
 
 ## Errors
 

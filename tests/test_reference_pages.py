@@ -37,6 +37,18 @@ class ReferencePagesTests(unittest.TestCase):
         self.assertIn("Do not send raw PAN", md)
         self.assertIn("sandbox only", md.lower())
 
+    def test_create_payment_request_table_lists_nested_fields(self):
+        units = load_reference_units()
+        unit = next(u for u in units if u["operation_id"] == "createPayment")
+        md = render_reference_page(unit)
+        # Request table only — real developer-typable dotted names + required flag.
+        request_section = md.split("## Request", 1)[1].split("## Response", 1)[0]
+        self.assertIn("orderInformation.amountDetails.totalAmount", request_section)
+        self.assertRegex(
+            request_section,
+            r"\|\s*orderInformation\.amountDetails\.totalAmount\s*\|\s*string\s*\|\s*yes\s*\|",
+        )
+
     def test_write_pages_uses_operation_id_filenames(self):
         units = load_reference_units()
         with tempfile.TemporaryDirectory() as tmp:

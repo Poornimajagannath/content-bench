@@ -28,13 +28,16 @@ Required scheme(s) from the OpenAPI fixture: `httpSignature`.
 
 | Name | Type | Required | Notes |
 | --- | --- | --- | --- |
-| CaptureRequest | object | yes |  |
+| clientReferenceInformation.code | string | no |  |
+| orderInformation.amountDetails.totalAmount | string | yes |  |
+| orderInformation.amountDetails.currency | string | no |  |
 
 ## Response
 
 | Name | Type | Required | Notes |
 | --- | --- | --- | --- |
-| Payment | object |  | Success schema Payment |
+| id | string | no |  |
+| status | string | no |  |
 
 ## Errors
 

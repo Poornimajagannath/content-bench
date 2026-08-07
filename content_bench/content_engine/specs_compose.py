@@ -36,7 +36,7 @@ def compose_reference_units(
                     }
                 )
 
-        request_fields = [
+        request_fields = list(entity.request_fields) or [
             {
                 "name": ref,
                 "type": "object",
@@ -45,7 +45,7 @@ def compose_reference_units(
             }
             for ref in entity.request_schema_refs
         ]
-        response_fields = [
+        response_fields = list(entity.response_fields) or [
             {
                 "name": ref,
                 "type": "object",

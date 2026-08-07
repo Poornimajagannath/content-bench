@@ -1,8 +1,8 @@
 {
   "stage": "specs_to_docs_parse",
   "source_id": "payments-core-openapi",
-  "snapshot_id": "payments-core-openapi-ae875f65766e",
-  "content_hash": "ae875f65766e81b88dc6e00cafc0c0517adf3c82aa8c64bbce50ab157f711fdb",
+  "snapshot_id": "payments-core-openapi-48ebf48835b9",
+  "content_hash": "48ebf48835b9dcc9e69ac2fcf19ac843d3ea0757b5b1479cd0ac8dc6ecb47af7",
   "entity_count": 8,
   "entities": [
     {
@@ -32,7 +32,46 @@
       ],
       "examples": [],
       "summary": "Create a credit",
-      "description": ""
+      "description": "",
+      "request_fields": [
+        {
+          "name": "clientReferenceInformation.code",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "orderInformation.amountDetails.totalAmount",
+          "type": "string",
+          "required": true,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "orderInformation.amountDetails.currency",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        }
+      ],
+      "response_fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        }
+      ]
     },
     {
       "entity_id": "payments-core-openapi:createPayment",
@@ -61,7 +100,94 @@
       ],
       "examples": [],
       "summary": "Create a payment authorization",
-      "description": "Authorize a payment in sandbox using tokenized or instrument identifiers. Do not send raw PAN."
+      "description": "Authorize a payment in sandbox using tokenized or instrument identifiers. Do not send raw PAN.",
+      "request_fields": [
+        {
+          "name": "clientReferenceInformation.code",
+          "type": "string",
+          "required": true,
+          "description": "Merchant reference code for the transaction",
+          "constraints": []
+        },
+        {
+          "name": "orderInformation.amountDetails.totalAmount",
+          "type": "string",
+          "required": true,
+          "description": "Order total amount",
+          "constraints": []
+        },
+        {
+          "name": "orderInformation.amountDetails.currency",
+          "type": "string",
+          "required": true,
+          "description": "ISO 4217 currency code",
+          "constraints": []
+        },
+        {
+          "name": "orderInformation.billTo.firstName",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "orderInformation.billTo.lastName",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "paymentInformation.card.number",
+          "type": "string",
+          "required": false,
+          "description": "Tokenized instrument or test card id \u2014 do not send raw PAN",
+          "constraints": []
+        },
+        {
+          "name": "paymentInformation.card.expirationMonth",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "paymentInformation.card.expirationYear",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "paymentInformation.card.type",
+          "type": "string",
+          "required": false,
+          "description": "Card type code",
+          "constraints": [
+            "enum: 001, 002"
+          ],
+          "enum": [
+            "001",
+            "002"
+          ]
+        }
+      ],
+      "response_fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        }
+      ]
     },
     {
       "entity_id": "payments-core-openapi:getPayment",
@@ -88,7 +214,24 @@
       ],
       "examples": [],
       "summary": "Retrieve a payment",
-      "description": ""
+      "description": "",
+      "request_fields": [],
+      "response_fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        }
+      ]
     },
     {
       "entity_id": "payments-core-openapi:capturePayment",
@@ -117,7 +260,46 @@
       ],
       "examples": [],
       "summary": "Capture an authorized payment",
-      "description": ""
+      "description": "",
+      "request_fields": [
+        {
+          "name": "clientReferenceInformation.code",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "orderInformation.amountDetails.totalAmount",
+          "type": "string",
+          "required": true,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "orderInformation.amountDetails.currency",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        }
+      ],
+      "response_fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        }
+      ]
     },
     {
       "entity_id": "payments-core-openapi:createMppCredentialSetup",
@@ -146,7 +328,39 @@
       ],
       "examples": [],
       "summary": "Create payer authentication / MPP credential setup",
-      "description": "Payer Authentication setup prerequisite before enrollment. Microform tokenize alone is not 3DS completion."
+      "description": "Payer Authentication setup prerequisite before enrollment. Microform tokenize alone is not 3DS completion.",
+      "request_fields": [
+        {
+          "name": "clientReferenceInformation",
+          "type": "object",
+          "required": true,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "processingInformation",
+          "type": "object",
+          "required": false,
+          "description": "",
+          "constraints": []
+        }
+      ],
+      "response_fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        }
+      ]
     },
     {
       "entity_id": "payments-core-openapi:checkMppEnrollment",
@@ -175,7 +389,39 @@
       ],
       "examples": [],
       "summary": "Check payer authentication enrollment",
-      "description": "Enrollment may return FRICTIONLESS, CHALLENGE, or UNAVAILABLE paths."
+      "description": "Enrollment may return FRICTIONLESS, CHALLENGE, or UNAVAILABLE paths.",
+      "request_fields": [
+        {
+          "name": "clientReferenceInformation",
+          "type": "object",
+          "required": true,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "processingInformation",
+          "type": "object",
+          "required": false,
+          "description": "",
+          "constraints": []
+        }
+      ],
+      "response_fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "status",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        }
+      ]
     },
     {
       "entity_id": "payments-core-openapi:createCustomer",
@@ -204,7 +450,39 @@
       ],
       "examples": [],
       "summary": "Create a TMS customer",
-      "description": ""
+      "description": "",
+      "request_fields": [
+        {
+          "name": "buyerInformation",
+          "type": "object",
+          "required": true,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "clientReferenceInformation",
+          "type": "object",
+          "required": false,
+          "description": "",
+          "constraints": []
+        }
+      ],
+      "response_fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "buyerInformation",
+          "type": "object",
+          "required": false,
+          "description": "",
+          "constraints": []
+        }
+      ]
     },
     {
       "entity_id": "payments-core-openapi:getCustomer",
@@ -231,7 +509,24 @@
       ],
       "examples": [],
       "summary": "Retrieve a TMS customer",
-      "description": ""
+      "description": "",
+      "request_fields": [],
+      "response_fields": [
+        {
+          "name": "id",
+          "type": "string",
+          "required": false,
+          "description": "",
+          "constraints": []
+        },
+        {
+          "name": "buyerInformation",
+          "type": "object",
+          "required": false,
+          "description": "",
+          "constraints": []
+        }
+      ]
     }
   ],
   "honest_label": {

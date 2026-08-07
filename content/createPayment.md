@@ -22,13 +22,22 @@ Required scheme(s) from the OpenAPI fixture: `httpSignature`.
 
 | Name | Type | Required | Notes |
 | --- | --- | --- | --- |
-| CreatePaymentRequest | object | yes |  |
+| clientReferenceInformation.code | string | yes | Merchant reference code for the transaction |
+| orderInformation.amountDetails.totalAmount | string | yes | Order total amount |
+| orderInformation.amountDetails.currency | string | yes | ISO 4217 currency code |
+| orderInformation.billTo.firstName | string | no |  |
+| orderInformation.billTo.lastName | string | no |  |
+| paymentInformation.card.number | string | no | Tokenized instrument or test card id — do not send raw PAN |
+| paymentInformation.card.expirationMonth | string | no |  |
+| paymentInformation.card.expirationYear | string | no |  |
+| paymentInformation.card.type | string | no | Card type code |
 
 ## Response
 
 | Name | Type | Required | Notes |
 | --- | --- | --- | --- |
-| Payment | object |  | Success schema Payment |
+| id | string | no |  |
+| status | string | no |  |
 
 ## Errors
 

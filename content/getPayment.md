@@ -32,7 +32,8 @@ _None listed_
 
 | Name | Type | Required | Notes |
 | --- | --- | --- | --- |
-| Payment | object |  | Success schema Payment |
+| id | string | no |  |
+| status | string | no |  |
 
 ## Errors
 

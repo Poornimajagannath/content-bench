@@ -1,6 +1,6 @@
 {
   "source_id": "payments-core-openapi",
-  "spec_snapshot_id": "payments-core-openapi-ae875f65766e",
+  "spec_snapshot_id": "payments-core-openapi-48ebf48835b9",
   "compared_against": [
     "artifacts/contracts/microform-payer-auth-state-machine.contract_bundle.json",
     "artifacts/content_engine/objects/microform-payer-auth-quickstart.quickstart_units.json"

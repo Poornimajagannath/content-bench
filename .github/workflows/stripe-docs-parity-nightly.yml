@@ -17,10 +17,9 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Run parity compare (live upstream)
-        id: compare
-        continue-on-error: true
-        run: python3 evals/run_stripe_docs_compare.py
+      - name: Run parity compare (live upstream, evidence only)
+        # --evidence always exits 0; findings are loop evidence, never build failures.
+        run: python3 evals/run_stripe_docs_compare.py --evidence
       - name: Upload parity report artifact
         if: always()
         uses: actions/upload-artifact@v4

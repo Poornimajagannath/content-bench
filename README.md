@@ -55,11 +55,11 @@ STRIPE_TEST_SECRET_KEY=sk_test_... python3 evals/run_connect_eval.py --mode live
 Frozen live trace: [`evals/evidence/v0.1-stripe-proof/connect-live.md`](evals/evidence/v0.1-stripe-proof/connect-live.md)
 ([JSON](evals/evidence/v0.1-stripe-proof/connect-live.json)).
 
-> **Live gate status:** the first live attempt failed because this Stripe
-> platform account has Accounts v1 creation disabled. Enable
-> [feat_accounts_v1_support](https://dashboard.stripe.com/settings/features/feat_accounts_v1_support)
-> in test mode, re-run `--mode live`, and replace the evidence files before
-> treating the demo sentence as true. Mock gate remains **pass**.
+**Live gate: pass** on the Samaya Stripe test platform (`acct_1TzhSHD…`).
+Generated docs still teach Accounts v1 controller fields (parity with public
+Stripe docs). The Samaya sandbox disables new v1 account creation, so the live
+eval falls back to Accounts v2 (same path as `~/workspace/stripe-quickstart`),
+then creates a v1 Account Link. Mock gate remains **pass**.
 
 ### 4. Measured against live upstream
 

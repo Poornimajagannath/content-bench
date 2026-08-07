@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "exclude_kinds": [
+    "release_note",
+    "legal",
+    "index_navigation"
+  ],
+  "notes": "Default quarantine kinds for corpus census. Product repos may amend. Run pipelines/run_corpus_census.py before ingestion."
+}

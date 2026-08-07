@@ -1,0 +1,28 @@
+{
+  "stamp_date": "2026-08-06",
+  "docs_fetched": 4,
+  "claims_extracted": 30,
+  "claims_by_schema": {
+    "quickstart_step": 10,
+    "endpoint_fact": 6,
+    "error_case": 0,
+    "prose_claim": 14
+  },
+  "drop_count": 1,
+  "drops": [
+    {
+      "path": "2026-08-06/account-links.md",
+      "reason": "no_schema_match",
+      "detail": "no quickstart/endpoint/error/prose claim extracted"
+    }
+  ],
+  "raw_dir": "raw/2026-08-06",
+  "normalized_file": "normalized/2026-08-06.claims.json",
+  "read_contract": [
+    "normalized/",
+    "content/"
+  ],
+  "forbidden_reads": [
+    "raw/"
+  ]
+}

@@ -6,7 +6,10 @@ lives under gitignored `evals/runs/` and `evals/latest.md`.
 | File | What it proves |
 | --- | --- |
 | `parity-15-of-15.md` | Live upstream docs parity: **15 of 15** checks (quote that way, not “identical to Stripe”) |
-| `connect-live.json` | Redacted live task-eval trace (`--mode live`) |
+| `connect-live.json` | Redacted live task-eval trace (`--mode live`, **gate pass**) |
 | `connect-live.md` | Human-readable gate summary for the same run |
+
+Live run platform: Samaya sandbox. Account create used Accounts **v2** because
+v1 creation is disabled on this platform; Account Link used **v1**.
 
 Nightly parity continues on branch `evidence/stripe-docs-parity` after the tag.

@@ -172,6 +172,9 @@ class ContractEntity:
     examples: List[str] = field(default_factory=list)
     summary: str = ""
     description: str = ""
+    # Flattened body fields from OpenAPI object schemas (specs parser).
+    request_fields: List[Dict[str, Any]] = field(default_factory=list)
+    response_fields: List[Dict[str, Any]] = field(default_factory=list)
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

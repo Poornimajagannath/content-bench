@@ -32,7 +32,8 @@ _None listed_
 
 | Name | Type | Required | Notes |
 | --- | --- | --- | --- |
-| Customer | object |  | Success schema Customer |
+| id | string | no |  |
+| buyerInformation | object | no |  |
 
 ## Errors
 

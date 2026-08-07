@@ -52,6 +52,19 @@ class SpecsToDocsTests(unittest.TestCase):
         self.assertTrue(all(e.auth_schemes for e in entities))
         self.assertTrue(all(e.endpoint.startswith("/") for e in entities))
 
+    def test_parser_flattens_nested_request_fields_with_required(self):
+        record = require_source(SOURCE_ID)
+        snapshot = materialize_snapshot(record)
+        entities = parse_openapi_entities(record, snapshot)
+        create = next(e for e in entities if e.operation_id == "createPayment")
+        by_name = {f["name"]: f for f in create.request_fields}
+        self.assertIn("orderInformation.amountDetails.totalAmount", by_name)
+        nested = by_name["orderInformation.amountDetails.totalAmount"]
+        self.assertTrue(nested["required"])
+        self.assertEqual(nested["type"], "string")
+        self.assertIn("clientReferenceInformation.code", by_name)
+        self.assertTrue(by_name["clientReferenceInformation.code"]["required"])
+
     def test_pipeline_promotes_with_contract_alignment(self):
         result = run_specs_to_docs(SOURCE_ID)
         self.assertTrue(result["ok"], result["issues"])

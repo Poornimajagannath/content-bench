@@ -22,13 +22,15 @@ Required scheme(s) from the OpenAPI fixture: `httpSignature`.
 
 | Name | Type | Required | Notes |
 | --- | --- | --- | --- |
-| MppCredentialRequest | object | yes |  |
+| clientReferenceInformation | object | yes |  |
+| processingInformation | object | no |  |
 
 ## Response
 
 | Name | Type | Required | Notes |
 | --- | --- | --- | --- |
-| MppCredential | object |  | Success schema MppCredential |
+| id | string | no |  |
+| status | string | no |  |
 
 ## Errors
 

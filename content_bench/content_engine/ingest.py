@@ -147,8 +147,8 @@ def stamp_copy_to_raw(
     return dest_dir, metas, drops
 
 
-# Shared triage heuristics live in triage.py — the one definition used by all
-# callers. Do not re-implement locally.
+# Shared triage heuristics live in triage.py — the one definition used by both
+# census and ingest. Do not re-implement locally.
 from content_bench.content_engine.triage import (  # noqa: E402
     constraint_kind as _constraint_kind,
     first_heading as _first_heading,
@@ -176,6 +176,7 @@ def _extract_prose_claims(
     claims: List[NormalizedClaim] = []
     seen: set[str] = set()
 
+    # 1) Constraint-type claims from any sentence (length is not emptiness).
     for sentence in _iter_sentences(text):
         kind = _constraint_kind(sentence)
         if not kind:
@@ -197,6 +198,7 @@ def _extract_prose_claims(
             )
         )
 
+    # 2) Imperative / guidance lines (broader than before: longer sentences OK).
     for match in re.finditer(
         r"(?m)^(?:[-*]\s+|(?:You|Developers?|Merchants?|After you)\s+)(.{20,500}[.!?])\s*$",
         text,
@@ -323,6 +325,7 @@ def _extract_claims_from_text(
 
     drop_reason = _should_drop_doc(text, Path(doc_stem))
     if drop_reason:
+        # Map legacy index/empty drops into shell triage when applicable
         reason = "shell" if drop_reason in {"index_page", "empty_or_stub"} else drop_reason
         drops.append(
             DropRecord(
@@ -335,7 +338,20 @@ def _extract_claims_from_text(
         )
         return claims, drops
 
-    # Quickstart steps: numbered headings or numbered lists
+    # API-reference pattern (Endpoint + Required Fields + REST Example) first.
+    # Rich endpoint_fact claims; UI quickstart_step extraction still runs below.
+    from content_bench.content_engine.api_reference import extract_api_reference_claims
+    from content_bench.content_engine.source_noise import (
+        attach_source_meta,
+        clean_claim_text,
+    )
+
+    api_claims, _api_report, covered_endpoints = extract_api_reference_claims(
+        text, source_pointer=source_pointer, doc_stem=doc_stem
+    )
+    claims.extend(api_claims)
+
+    # Quickstart steps: numbered headings or numbered lists (UI procedures).
     step_pat = re.compile(
         r"(?m)^(?:#{2,4}\s*)?(?:Step\s*)?(\d+)[.:)\s]+(.+?)(?:\n|$)"
     )
@@ -343,37 +359,53 @@ def _extract_claims_from_text(
         n, title = match.group(1), match.group(2).strip()
         if len(title) < 3:
             continue
-        # Navigation entries are not steps: numbered "See [link]" lines and
-        # link-only lines are cross-references.
+        # Navigation entries are not steps. A numbered "See [link]" line, or a
+        # line that is nothing but markdown links, is a cross-reference —
+        # extracting those as steps is how 3 landing pages produced 550 fake
+        # quickstart_step claims.
         if re.search(r"\bSee \[", title):
             continue
         without_links = re.sub(r"\[[^\]]*\]\([^)]*\)", "", title).strip(" .*-—")
         if len(without_links) < 12:
             continue
-        # DITA anchors are markup, not step text; stripping them lets
-        # prefer-child dedupe match mega-guide and child twins.
-        title = re.sub(r"\s*\{#[^}]+\}\s*$", "", title).strip()
-        if len(title) < 3:
+        # Anchors are live deep-link targets — lift into metadata, not delete.
+        clean_title, noise = clean_claim_text(title)
+        if len(clean_title) < 3:
             continue
         # Step ids must be unique per occurrence: one doc can hold many
         # procedures, so `doc_stem:step:{n}` collides across sections.
-        occ = hashlib.sha1(f"{match.start()}:{title}".encode()).hexdigest()[:8]
+        occ = hashlib.sha1(f"{match.start()}:{clean_title}".encode()).hexdigest()[:8]
+        extras: Dict[str, Any] = {"sequence": int(n)}
+        extras = attach_source_meta(
+            extras,
+            source_pointer=source_pointer,
+            raw_span_text=title,
+            full_text=text,
+            span_start=match.start(),
+            span_end=match.end(),
+        )
+        # Prefer noise from the step line itself (attach may see only the line).
+        extras.update(noise)
+        if noise.get("anchor"):
+            from content_bench.content_engine.source_noise import deep_link_for
+
+            link = deep_link_for(source_pointer, noise["anchor"])
+            if link:
+                extras["deep_link"] = link
         claims.append(
             NormalizedClaim(
                 claim_id=f"{doc_stem}:step:{n}:{occ}",
                 schema="quickstart_step",
-                title=title[:120],
-                text=title,
+                title=clean_title[:120],
+                text=clean_title,
                 source_pointer=source_pointer,
-                extras={"sequence": int(n)},
+                extras=extras,
             )
         )
 
-    # Endpoint facts: HTTP verbs + paths. Two documented shapes:
-    #   1) bare:       POST /pts/v2/payments
-    #   2) backticked full-URL (vendor guide style):
-    #      **Production:** `POST ``https://api.example.com``/boarding/v1/registrations`
-    seen_endpoints: set[str] = set()
+    # Endpoint facts (thin C1 scanner): bare verb+path or backticked full URL.
+    # Skip keys already emitted by the API-reference pattern to avoid dupes.
+    seen_endpoints: set[str] = set(covered_endpoints)
     for match in re.finditer(
         r"\b(GET|POST|PUT|PATCH|DELETE)\b[`\s]*((?:https?://[A-Za-z0-9.-]+)?)[`\s]*(/[A-Za-z0-9_{}/.-]+)",
         text,
@@ -384,30 +416,49 @@ def _extract_claims_from_text(
         if key in seen_endpoints:
             continue
         seen_endpoints.add(key)
-        extras = {"method": method, "path": path}
+        label = f"{method} {host}{path}" if host else f"{method} {path}"
+        clean_label, noise = clean_claim_text(label)
+        extras = {"method": method, "path": path, "pattern": "verb_path"}
         if host:
             extras["host"] = host
-            extras["environment"] = "test" if "test" in host else "production"
+            extras["environment"] = (
+                "test" if "test" in host else "production"
+            )
+        extras = attach_source_meta(
+            extras,
+            source_pointer=source_pointer,
+            raw_span_text=match.group(0),
+            full_text=text,
+            span_start=match.start(),
+            span_end=match.end(),
+        )
+        extras.update(noise)
         claims.append(
             NormalizedClaim(
                 claim_id=f"{doc_stem}:endpoint:{method.lower()}:{hashlib.sha1(key.encode()).hexdigest()[:8]}",
                 schema="endpoint_fact",
                 title=f"{method} {path}",
-                text=(f"{method} {host}{path}" if host else f"{method} {path}"),
+                text=clean_label,
                 source_pointer=source_pointer,
                 extras=extras,
             )
         )
 
-    # Error cases
+    # Error cases — dedupe identical snippets within one doc (repeated error
+    # text is one fact, not N claims; identical ids must not collide).
+    seen_errors: set[str] = set()
     for match in re.finditer(
         r"(?i)\b(error|fault)\b[^\n]{0,80}\b(\d{3}|[A-Z][A-Z0-9_]{2,})\b",
         text,
     ):
         snippet = match.group(0).strip()
+        digest = hashlib.sha1(snippet.encode()).hexdigest()[:8]
+        if digest in seen_errors:
+            continue
+        seen_errors.add(digest)
         claims.append(
             NormalizedClaim(
-                claim_id=f"{doc_stem}:error:{hashlib.sha1(snippet.encode()).hexdigest()[:8]}",
+                claim_id=f"{doc_stem}:error:{digest}",
                 schema="error_case",
                 title=snippet[:80],
                 text=snippet,
@@ -509,7 +560,8 @@ def normalize_raw_dir(
     for path in sorted(raw_dir.iterdir()):
         if not path.is_file() or path.name.endswith(".meta.json"):
             continue
-        # OpenAPI JSON is handled below via extract_openapi_endpoint_facts.
+        # OpenAPI JSON is handled below via extract_openapi_endpoint_facts —
+        # do not run prose extractors on raw JSON (heading would be "{").
         if path.suffix == ".json":
             continue
         if path.suffix not in {".md", ".txt"} and not path.name.endswith(".md.md"):
@@ -576,21 +628,124 @@ def normalize_raw_dir(
     return all_claims, all_drops
 
 
-def select_ingest_sources(docs_dir: Path, limit: int = 60) -> List[Path]:
+def load_quarantine_basenames(quarantine_list_path: Optional[Path]) -> set[str]:
+    """Load path/basename set from corpus census quarantine-list.json."""
+    if quarantine_list_path is None or not quarantine_list_path.is_file():
+        return set()
+    data = json.loads(quarantine_list_path.read_text(encoding="utf-8"))
+    out: set[str] = set()
+    for p in data.get("paths") or []:
+        out.add(str(p))
+        out.add(Path(str(p)).name)
+    for row in data.get("entries") or []:
+        p = row.get("path")
+        if p:
+            out.add(str(p))
+            out.add(Path(str(p)).name)
+    return out
+
+
+def select_ingest_sources(
+    docs_dir: Path,
+    limit: int = 60,
+    *,
+    quarantine_names: Optional[set[str]] = None,
+) -> Tuple[List[Path], List[DropRecord]]:
+    """Pick ingest sources, skipping paths on the quarantine list (policy)."""
+    blocked = quarantine_names or set()
     files = sorted(
         p
         for p in docs_dir.iterdir()
-        if p.is_file() and p.suffix == ".md" and not p.name.startswith("_")
+        if p.is_file()
+        and (p.suffix == ".md" or p.name.endswith(".md.md"))
+        and not p.name.startswith("_")
     )
-    if len(files) <= limit:
-        return files
+    drops: List[DropRecord] = []
+    eligible: List[Path] = []
+    for p in files:
+        if p.name in blocked or str(p) in blocked:
+            try:
+                text = p.read_text(encoding="utf-8", errors="replace")
+            except OSError:
+                text = ""
+            drops.append(
+                DropRecord(
+                    path=p.name,
+                    reason="quarantine_policy",
+                    detail="excluded by corpus census quarantine list",
+                    bytes=p.stat().st_size if p.is_file() else 0,
+                    first_heading=_first_heading(text) or "(no heading)",
+                )
+            )
+            continue
+        eligible.append(p)
+
+    if len(eligible) <= limit:
+        return eligible, drops
     keywords = ("auth", "payment", "getting-started", "microform", "sandbox", "token", "error")
-    preferred = [p for p in files if any(k in p.name.lower() for k in keywords)]
-    rest = [p for p in files if p not in preferred]
+    preferred = [p for p in eligible if any(k in p.name.lower() for k in keywords)]
+    rest = [p for p in eligible if p not in preferred]
     out = preferred[: limit // 2]
     step = max(len(rest) // max(limit - len(out), 1), 1)
     out.extend(rest[::step][: limit - len(out)])
-    return out[:limit]
+    return out[:limit], drops
+
+
+class CorpusMismatchError(RuntimeError):
+    """Census eligible count and ingestion input count differ.
+
+    The census-eligible set is the single corpus definition. If ingestion
+    would consume a different roster, fail loudly rather than silently
+    ingesting a slice — 3 landing pages standing in for 182 eligible docs is
+    how Wave 2 nearly shipped hollow.
+    """
+
+
+def select_ingest_sources_from_census(
+    census_report_path: Path,
+    *,
+    docs_dir: Optional[Path] = None,
+) -> Tuple[List[Path], List[DropRecord]]:
+    """The census-eligible set is the single input to ingestion.
+
+    Reads census-report.json (the decision record: kind + quarantine policy
+    already applied) and returns exactly the eligible files as sources, with
+    quarantined files recorded as drops. Raises CorpusMismatchError if the
+    resolved source count differs from the census eligible_count.
+    """
+    data = json.loads(census_report_path.read_text(encoding="utf-8"))
+    base = Path(docs_dir) if docs_dir else Path(data["docs_dir"])
+    if not base.is_absolute():
+        base = ROOT / base
+    srcs: List[Path] = []
+    drops: List[DropRecord] = []
+    missing: List[str] = []
+    for row in data.get("classifications") or []:
+        path = base / row["path"]
+        if row.get("quarantined"):
+            drops.append(
+                DropRecord(
+                    path=row["path"],
+                    reason="quarantine_policy",
+                    detail=f"census kind={row.get('kind')} — excluded by policy",
+                    bytes=row.get("bytes"),
+                    first_heading=row.get("title") or "(no heading)",
+                )
+            )
+            continue
+        if not path.is_file():
+            missing.append(row["path"])
+            continue
+        srcs.append(path)
+    eligible_count = int(data.get("eligible_count") or 0)
+    if len(srcs) != eligible_count:
+        raise CorpusMismatchError(
+            f"census eligible_count={eligible_count} but ingestion resolved "
+            f"{len(srcs)} sources (missing files: {missing[:5]}"
+            f"{'…' if len(missing) > 5 else ''}). Re-run the census against "
+            f"the current corpus before ingesting."
+        )
+    return srcs, drops
 
 
 def run_ingestion_snapshot(
@@ -602,8 +757,22 @@ def run_ingestion_snapshot(
     stamp_date: Optional[str] = None,
     sample_limit: int = 60,
     sources: Optional[Sequence[Path]] = None,
+    quarantine_list_path: Optional[Path] = None,
+    census_report_path: Optional[Path] = None,
 ) -> Dict[str, Any]:
-    srcs = list(sources) if sources is not None else select_ingest_sources(docs_dir, limit=sample_limit)
+    quarantine_drops: List[DropRecord] = []
+    if sources is not None:
+        srcs = list(sources)
+    elif census_report_path is not None:
+        # One corpus definition: the census-eligible set is the roster.
+        srcs, quarantine_drops = select_ingest_sources_from_census(
+            census_report_path, docs_dir=docs_dir
+        )
+    else:
+        blocked = load_quarantine_basenames(quarantine_list_path)
+        srcs, quarantine_drops = select_ingest_sources(
+            docs_dir, limit=sample_limit, quarantine_names=blocked
+        )
     raw_dir, metas, copy_drops = stamp_copy_to_raw(
         srcs,
         raw_root=raw_root,
@@ -614,7 +783,7 @@ def run_ingestion_snapshot(
         normalized_root=normalized_root,
         openapi_path=openapi_path if openapi_path.is_file() else None,
     )
-    drops = copy_drops + extract_drops
+    drops = quarantine_drops + copy_drops + extract_drops
     report = {
         "stamp_date": raw_dir.name,
         "docs_fetched": len(metas),
@@ -625,6 +794,10 @@ def run_ingestion_snapshot(
         },
         "drop_count": len(drops),
         "drops": [d.to_dict() for d in drops],
+        "quarantine_skipped": len(quarantine_drops),
+        "quarantine_list": str(quarantine_list_path) if quarantine_list_path else None,
+        "census_report": str(census_report_path) if census_report_path else None,
+        "ingest_input_count": len(srcs),
         "raw_dir": str(raw_dir.relative_to(ROOT)) if raw_dir.is_relative_to(ROOT) else str(raw_dir),
         "normalized_file": f"normalized/{raw_dir.name}.claims.json",
         "read_contract": ["normalized/", "content/"],
@@ -642,7 +815,6 @@ def render_ingestion_report(report: Dict[str, Any]) -> str:
         f"- Stamp date: `{report['stamp_date']}`",
         f"- Docs fetched into raw: {report['docs_fetched']}",
         f"- Claims extracted: {report['claims_extracted']}",
-        f"- Drop count: {report.get('drop_count', len(report.get('drops') or []))}",
         f"- Raw dir: `{report['raw_dir']}`",
         f"- Normalized file: `{report['normalized_file']}`",
         f"- Read contract: {', '.join(report['read_contract'])}",
@@ -655,16 +827,33 @@ def render_ingestion_report(report: Dict[str, Any]) -> str:
     ]
     for schema, count in report["claims_by_schema"].items():
         lines.append(f"| {schema} | {count} |")
+
+    if report.get("recall"):
+        r = report["recall"]
+        lines.extend(
+            [
+                "",
+                "## Extraction recall",
+                "",
+                f"- Prior `no_schema_match` drops in comparison set: {r.get('prior_no_schema_match', '—')}",
+                f"- Of those, now yielding claims: **{r.get('recovered', '—')}**",
+                f"- Still dropped: {r.get('still_dropped', '—')}",
+            ]
+        )
+
     lines.extend(["", "## Drop log", ""])
     if not report["drops"]:
         lines.append("_No drops._")
     else:
-        lines.append("| Path | Reason | Bytes | First heading | Detail |")
+        lines.append(
+            "| Path | Reason | Bytes | First heading | Detail |"
+        )
         lines.append("| --- | --- | ---: | --- | --- |")
         for d in report["drops"][:200]:
             heading = (d.get("first_heading") or "—").replace("|", "\\|")
             b = d.get("bytes")
             b_s = str(b) if b is not None else "—"
+            # Shell drops MUST carry bytes + heading (triage rule).
             if d.get("reason") == "shell" and (b is None or not d.get("first_heading")):
                 heading = f"⚠ MISSING TRIAGE FIELDS — {heading}"
             lines.append(
@@ -674,6 +863,8 @@ def render_ingestion_report(report: Dict[str, Any]) -> str:
             lines.append(
                 f"| … | … | … | … | {len(report['drops']) - 200} more |"
             )
+
+        # Sampled human check — 10 drops, not labels-by-filename
         sample = report.get("human_check_sample") or report["drops"][:10]
         lines.extend(
             [

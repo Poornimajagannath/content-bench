@@ -343,9 +343,24 @@ def _extract_claims_from_text(
         n, title = match.group(1), match.group(2).strip()
         if len(title) < 3:
             continue
+        # Navigation entries are not steps: numbered "See [link]" lines and
+        # link-only lines are cross-references.
+        if re.search(r"\bSee \[", title):
+            continue
+        without_links = re.sub(r"\[[^\]]*\]\([^)]*\)", "", title).strip(" .*-—")
+        if len(without_links) < 12:
+            continue
+        # DITA anchors are markup, not step text; stripping them lets
+        # prefer-child dedupe match mega-guide and child twins.
+        title = re.sub(r"\s*\{#[^}]+\}\s*$", "", title).strip()
+        if len(title) < 3:
+            continue
+        # Step ids must be unique per occurrence: one doc can hold many
+        # procedures, so `doc_stem:step:{n}` collides across sections.
+        occ = hashlib.sha1(f"{match.start()}:{title}".encode()).hexdigest()[:8]
         claims.append(
             NormalizedClaim(
-                claim_id=f"{doc_stem}:step:{n}",
+                claim_id=f"{doc_stem}:step:{n}:{occ}",
                 schema="quickstart_step",
                 title=title[:120],
                 text=title,
@@ -354,19 +369,33 @@ def _extract_claims_from_text(
             )
         )
 
-    # Endpoint facts: HTTP verbs + paths
+    # Endpoint facts: HTTP verbs + paths. Two documented shapes:
+    #   1) bare:       POST /pts/v2/payments
+    #   2) backticked full-URL (vendor guide style):
+    #      **Production:** `POST ``https://api.example.com``/boarding/v1/registrations`
+    seen_endpoints: set[str] = set()
     for match in re.finditer(
-        r"\b(GET|POST|PUT|PATCH|DELETE)\s+(/[A-Za-z0-9_{}/.-]+)",
+        r"\b(GET|POST|PUT|PATCH|DELETE)\b[`\s]*((?:https?://[A-Za-z0-9.-]+)?)[`\s]*(/[A-Za-z0-9_{}/.-]+)",
         text,
     ):
+        method, host, path = match.group(1), match.group(2), match.group(3)
+        path = path.rstrip(".")
+        key = f"{method}:{host}:{path}"
+        if key in seen_endpoints:
+            continue
+        seen_endpoints.add(key)
+        extras = {"method": method, "path": path}
+        if host:
+            extras["host"] = host
+            extras["environment"] = "test" if "test" in host else "production"
         claims.append(
             NormalizedClaim(
-                claim_id=f"{doc_stem}:endpoint:{match.group(1).lower()}:{hashlib.sha1(match.group(0).encode()).hexdigest()[:8]}",
+                claim_id=f"{doc_stem}:endpoint:{method.lower()}:{hashlib.sha1(key.encode()).hexdigest()[:8]}",
                 schema="endpoint_fact",
-                title=f"{match.group(1)} {match.group(2)}",
-                text=match.group(0),
+                title=f"{method} {path}",
+                text=(f"{method} {host}{path}" if host else f"{method} {path}"),
                 source_pointer=source_pointer,
-                extras={"method": match.group(1), "path": match.group(2)},
+                extras=extras,
             )
         )
 

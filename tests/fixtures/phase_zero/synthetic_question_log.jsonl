@@ -1,0 +1,6 @@
+{"question": "What is the endpoint to capture a payment?", "verdict": "answered_from_docs", "sources_used": ["content/capturePayment.md"], "notes": "POST /pts/v2/payments/captures documented."}
+{"question": "How do refunds work in sandbox?", "verdict": "partial", "sources_used": ["content/refundCapture.md"], "notes": "Reference exists; no sandbox walkthrough."}
+{"question": "What BIN details does TMS return?", "verdict": "gap", "sources_used": [], "notes": "No published TMS BIN page yet."}
+{"question": "ok?", "verdict": "answered_from_docs", "sources_used": ["content/createPayment.md"], "notes": "Too vague."}
+{"verdict": "gap", "notes": "missing question field"}
+{"question": "How do I board via API only?", "verdict": "maybe", "sources_used": [], "notes": "unknown verdict token"}
